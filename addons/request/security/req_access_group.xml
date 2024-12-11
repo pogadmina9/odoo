@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<!-- Checking Purchase Order -->	
+    <record id="group_purchase_controller" model="res.groups">
+        <field name="name">Purchase Controller</field>
+		<field name="category_id" ref="base.module_category_productivity_request"/>
+		<field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">The user will be able to manage PO Checking.</field>
+    </record>
+
+    <record id="group_purchasing" model="res.groups">
+        <field name="name">Purchasing</field>
+		<field name="category_id" ref="base.module_category_productivity_request"/>
+		<field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">The user will be able to create PO Checking request.</field>
+    </record>	
+
+    <!-- Internal IT -->
+	<record id="group_internal_it_admin" model="res.groups">
+        <field name="name">Internal IT Admin</field>
+		<field name="category_id" ref="base.module_category_productivity_request"/>
+		<field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">The user will be able to manage internal IT request.</field>		
+    </record>
+	<record id="group_internal_it_user" model="res.groups">
+        <field name="name">Internal IT User</field>
+		<field name="category_id" ref="base.module_category_productivity_request"/>
+		<field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">The user will be able to resolve internal IT request.</field>		
+    </record>
+	
+    <data noupdate="1">
+    </data>
+
+</odoo>

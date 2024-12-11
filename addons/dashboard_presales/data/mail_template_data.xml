@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+	<!-- Email template for new Task & Need Approval -->
+        <record id="new_record_issued" model="mail.template">
+            <field name="name">New Record</field>
+            <field name="model_id" ref="dashboard_presales.model_presales_training"/>
+            <field name="subject">(Need Approval) {{ ('New Training Record Issued by ' if object.type == 'training' else 'New Certification Record Issued by ') }} {{ (object.name.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.name.employee_id.parent_id.user_id.email_formatted) }}</field>
+            <field name="email_cc">{{ (object.name.email_formatted) }}</field>
+            <field name="description">Send approval notification for new training or certification</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="'New Certification' if object.type == 'certification' else 'New Training'">Type</t><br />
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.name.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.name.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.name.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.name.employee_id.parent_id.name or ''">Upline</t>,<br /><br />
+                        New <t t-out="'certification' if object.type == 'certification' else 'training'">Type</t> record has been created by <t t-out="object.name.name or ''">Presales</t> and waiting for your approval :<br />
+						 <br />
+						Name : <t t-out="object.subject or ''">Subject</t><br />
+						Brand : <t t-out="object.brand.name or ''">Brand</t><br />
+						Category : <t t-out="object.category.name or ''">Category</t><br />
+						<t t-out="'Issued Date' if object.type == 'certification' else 'Training Date'">IssuedDate</t> : <t t-out="object.issued_date or ''">Date</t><br />
+						<t t-if="object.exp_date"> Expired Date : <t t-out="object.exp_date or ''">Exp Date</t><br /></t>
+						 <br />						 							
+						Please visit the link to see details : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://portal.performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.name.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		<!-- Email template for approved training -->
+        <record id="new_record_action" model="mail.template">
+            <field name="name">New Record Action</field>
+            <field name="model_id" ref="dashboard_presales.model_presales_training"/>
+            <field name="subject">{{ ('Congratulations!' if object.status_id.id == 3 else 'Please Recheck!') }} Your New {{ ('Certification Record' if object.type == 'certification' else 'Training Record') }} {{ ('is Approved 🎉' if object.status_id.id == 3 else 'is Rejected') }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.name.email_formatted) }}</field>
+            <field name="description">Send action notification for new training or certification</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="'New Certification' if object.type == 'certification' else 'New Training'">Type</t><br />
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.name.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.name.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.name.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.name.name or ''">Presales</t>,<br /><br />
+                        Your new <t t-out="'certification' if object.type == 'certification' else 'training'">Type</t> record has been <t t-out="'approved' if object.status_id.id == 3 else 'rejected'">Decision</t> :<br />
+						 <br />
+						Name : <t t-out="object.subject or ''">Subject</t><br />
+						Brand : <t t-out="object.brand.name or ''">Brand</t><br />
+						Category : <t t-out="object.category.name or ''">Category</t><br />
+						<t t-out="'Issued Date' if object.type == 'certification' else 'Training Date'">IssuedDate</t> : <t t-out="object.issued_date or ''">Date</t><br />
+						<t t-if="object.exp_date"> Expired Date : <t t-out="object.exp_date or ''">Exp Date</t><br /></t>	
+						<t t-if="object.reject_reason"> Reject Reason : <t t-out="object.reject_reason or ''">Reject Reason</t><br /></t>	
+						 <br />						 							
+						Please visit the link to see details : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://portal.performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.name.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		<!-- Email template for new solution -->
+        <record id="new_solution_issued" model="mail.template">
+            <field name="name">New Solution</field>
+            <field name="model_id" ref="dashboard_presales.model_solutions_list"/>
+            <field name="subject">(Need Approval) New Solution Created by {{ (object.created_by.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.created_by.employee_id.parent_id.user_id.email_formatted) }}</field>
+            <field name="email_cc">{{ (object.created_by.email_formatted) }}</field>
+            <field name="description">Send review notification for new solution</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name">SolutionTitle</t><br />
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.created_by.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.created_by.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.created_by.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.created_by.employee_id.parent_id.name or ''">Upline</t>,<br /><br />
+                        New solution has been created by <t t-out="object.created_by.name or ''">Presales</t> and waiting for your review :<br />
+						 <br />
+						Title : <t t-out="object.name or ''">Title</t><br />
+						Author : <t t-out="object.created_by.name or ''">Author</t><br />
+						Industry : 
+						<ul>
+							<li t-foreach="object.industry" t-as="industry">
+								<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>								
+									<span style="margin-left:5px" t-out="industry.name or ''">Idustry</span>								
+							</li>
+						</ul>
+						Overview : <t t-out="object.description or ''">Description</t><br />
+						 <br />						 							
+						Please visit the link to see details : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://portal.performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.created_by.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		<!-- Email template for new solution action-->
+        <record id="new_solution_action" model="mail.template">
+            <field name="name">New Solution Action</field>
+            <field name="model_id" ref="dashboard_presales.model_solutions_list"/>
+            <field name="subject">{{ ('Congratulations!' if object.status.id == 3 else 'Please Recheck!') }} Your New Solution {{ ('is Approved 🎉' if object.status.id == 3 else 'is Rejected') }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.created_by.email_formatted) }}</field>
+            <field name="description">Send action notification for new solution</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name">SolutionTitle</t><br />
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.created_by.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.created_by.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.created_by.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.created_by.name or ''">Presales</t>,<br /><br />
+                        Your new solution has been <t t-out="'approved' if object.status.id == 3 else 'rejected'">Decision</t> :<br />
+						 <br />
+						Title : <t t-out="object.name or ''">Title</t><br />
+						Author : <t t-out="object.created_by.name or ''">Author</t><br />
+						Industry : 
+						<ul>
+							<li t-foreach="object.industry" t-as="industry">
+								<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>								
+									<span style="margin-left:5px" t-out="industry.name or ''">Idustry</span>								
+							</li>
+						</ul>
+						Overview : <t t-out="object.description or ''">Description</t><br />
+						<t t-if="object.reject_reason"> Reject Reason : <t t-out="object.reject_reason or ''">Reject Reason</t><br /></t>	
+						 <br />						 							
+						Please visit the link to see details : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://portal.performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.created_by.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+	</data>
+</odoo>
+		

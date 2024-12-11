@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Email template for new -->
+        <record id="new_po_checking_req" model="mail.template">
+            <field name="name">New Purchase Order Checking</field>
+            <field name="model_id" ref="request.model_req_purchasing"/>
+            <field name="subject">New Purchase Order {{ (object.nomor_po) }} Checking from {{ (object.purchasing_id.name.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">purchasecontroller@performaoptimagroup.com</field>
+            <field name="email_cc">{{ (object.purchasing_id.name.email) }}, {{ (object.purchasing_id.name.employee_id.parent_id.work_email) }}, {{ (object.sales.email) }}</field>
+            <field name="description">Sent notification for new purchase order checking</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.purchasing_id.name.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.purchasing_id.name.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.purchasing_id.name.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Controller,<br /><br />
+                        Terdapat pengajuan checking PO dari <t t-out="object.purchasing_id.name.name or ''">TeamProduct</t> :<br />
+						 <br />
+						Nomor PO : <t t-out="object.nomor_po or ''">NomorPO</t><br />
+						Submit Date : <t t-out="format_datetime(dt=object.submit_date, tz=object.purchasing_id.name.tz) or ''">SubmitDate</t><br />
+						Nama Sales : <t t-out="object.sales.name or ''">Sales</t><br />
+						Nomor Paket : <t t-out="object.nomor_paket or ''">NomorPaket</t><br />
+						<t t-if="object.purchasing_note">Purchasing Note : <t t-out="object.purchasing_note or ''">Note</t><br /></t>
+						 <br />						 
+						Segera review dan approve / reject untuk melanjutkan.  <br />	
+						Silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.purchasing_id.name.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		<!-- Email template for new -->
+        <record id="po_checking_rejected" model="mail.template">
+            <field name="name">Purchase Order Rejected</field>
+            <field name="model_id" ref="request.model_req_purchasing"/>
+            <field name="subject">(Rejected) Purchase Order {{ (object.nomor_po) }} Is Rejected -- Please Recheck</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.purchasing_id.name.email) }}</field>
+            <field name="email_cc">purchasecontroller@performaoptimagroup.com, {{ (object.purchasing_id.name.employee_id.parent_id.work_email) }}, {{ (object.sales.email) }}</field>
+            <field name="description">Sent notification for purchase order rejection</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.purchasing_id.name.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.purchasing_id.name.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.purchasing_id.name.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.purchasing_id.name.name or ''">TeamProduct</t>,<br /><br />
+                        Pengajuan checking PO Anda berikut ini telah ditolak :<br />
+						 <br />
+						Nomor PO : <t t-out="object.nomor_po or ''">NomorPO</t><br />
+						Submit Date : <t t-out="format_datetime(dt=object.submit_date, tz=object.purchasing_id.name.tz) or ''">SubmitDate</t><br />
+						Nama Sales : <t t-out="object.sales.name or ''">Sales</t><br />
+						Nomor Paket : <t t-out="object.nomor_paket or ''">NomorPaket</t><br />
+						Checker : <t t-out="object.checker.name.name or ''">Checker</t><br />
+						<t t-if="object.reject_reason_id">Reject Reason :
+						<ul>
+							<li t-foreach="object.reject_reason_id" t-as="reject_reason_id">
+								<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>								
+									<span style="margin-left:5px" t-out="reject_reason_id.name or ''">RejectReason</span>								
+							</li>
+						</ul></t>
+						 <br />
+						 <br />						 
+						Segera revisi PO dan ajukan ulang.  <br />	
+						Silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.purchasing_id.name.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+				<!-- Email template for new -->
+        <record id="po_checking_approved" model="mail.template">
+            <field name="name">Purchase Order Approved</field>
+            <field name="model_id" ref="request.model_req_purchasing"/>
+            <field name="subject">(Approved) Purchase Order {{ (object.nomor_po) }} Is Approved -- Please Proceed</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.purchasing_id.name.email) }}</field>
+            <field name="email_cc">purchasecontroller@performaoptimagroup.com, {{ (object.purchasing_id.name.employee_id.parent_id.work_email) }}, {{ (object.sales.email) }}</field>
+            <field name="description">Sent notification for approved purchase order</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.purchasing_id.name.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.purchasing_id.name.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.purchasing_id.name.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.purchasing_id.name.name or ''">TeamProduct</t>,<br /><br />
+                        Pengajuan checking PO Anda berikut ini telah disetujui :<br />
+						 <br />
+						Nomor PO : <t t-out="object.nomor_po or ''">NomorPO</t><br />
+						Submit Date : <t t-out="format_datetime(dt=object.submit_date, tz=object.purchasing_id.name.tz) or ''">SubmitDate</t><br />
+						Nama Sales : <t t-out="object.sales.name or ''">Sales</t><br />
+						Nomor Paket : <t t-out="object.nomor_paket or ''">NomorPaket</t><br />
+						Checker : <t t-out="object.checker.name.name or ''">Checker</t><br />
+						 <br />						 
+						Segera lanjutkan proses PO ke vendor.  <br />	
+						Untuk detail checking silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.purchasing_id.name.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+	</data>
+</odoo>
+		

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="seq_task" model="ir.sequence">
+            <field name="name">Task Sequence</field>
+            <field name="code">req.task.seq</field>
+            <field name="prefix">TASK/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+		<record id="seq_todo_task" model="ir.sequence">
+            <field name="name">Todo Sequence</field>
+            <field name="code">todo.seq</field>
+            <field name="prefix">TODO/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+    </data>
+</odoo>

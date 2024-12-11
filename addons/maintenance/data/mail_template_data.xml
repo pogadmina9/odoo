@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Email template for new PJ request -->
+        <record id="new_req_pj" model="mail.template">
+            <field name="name">New Request Raised</field>
+            <field name="model_id" ref="maintenance.model_pengajuan_jasa"/>
+            <field name="subject">New--Permintaan {{ object.activity_type.name}} {{ object.name }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ object.approver_email }}</field>
+            <field name="email_cc">{{ object.sales.email_formatted }}, {{ (object.requester.email_formatted if object.requester != object.sales else '') }}, {{ (', abdulrozak@performaoptimagroup.com,yoki@performaoptimagroup.com' if object.man_power in ['presales', 'both'] else '') }}{{ (',admin.project@performaoptimagroup.com' if object.man_power in ['teknisi', 'both'] else '') }}{{ (',abdulrozak@performaoptimagroup.com,yoki@performaoptimagroup.com' if object.man_power in ['teknisi'] and object.activity_type.id in [16,12] else '') }}</field>
+            <field name="description">Sent creation notification for PJ</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Team,<br /><br />
+                        Terdapat permintaan <t t-out="object.activity_type.name or ''">YourCompany</t> baru sebagai berikut :<br />
+						 <br />
+						Nama Sales : <t t-out="object.sales.name or ''">NamaSales</t><br />
+						Instansi : <t t-out="object.partner.name or ''">Instansi</t><br />
+						Jadwal : <t t-out="format_datetime(dt=object.schedule_date, tz=object.sales.tz) or ''">Jadwal</t><br />
+						Detail Pekerjaan : <t t-out="object.job_description or ''">DetailPekerjaan</t><br />
+						 <br />
+						 
+						Untuk detail lebih lanjut akses link berikut :
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=auth" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		<record id="new_req_pj_teknisi" model="mail.template">
+            <field name="name">New Request Raised (Teknisi)</field>
+            <field name="model_id" ref="maintenance.model_pengajuan_jasa"/>
+            <field name="subject">New--Permintaan {{ object.activity_type.name}} {{ object.name }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ object.approver_email }}</field>
+            <field name="email_cc">{{ object.requester.email_formatted }}, {{ object.sales.email_formatted }}, admin.project@performaoptimagroup.com</field>
+            <field name="description">Sent creation notification for PJ</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Team,<br /><br />
+                        Terdapat permintaan <t t-out="object.activity_type.name or ''">YourCompany</t> baru sebagai berikut :<br />
+						 <br />
+						Nama Sales : <t t-out="object.sales.name or ''">NamaSales</t><br />
+						Instansi : <t t-out="object.partner.name or ''">Instansi</t><br />
+						Jadwal : <t t-out="format_datetime(dt=object.schedule_date, tz=object.sales.tz) or ''">Jadwal</t><br />
+						Detail Pekerjaan : <t t-out="object.job_description or ''">DetailPekerjaan</t><br />
+						 <br />
+						 
+						Untuk detail lebih lanjut akses link berikut :
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=auth" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+<!-- Email template for Scheduled PJ request -->
+        <record id="req_scheduled_pj" model="mail.template">
+            <field name="name">Request is Scheduled for Technical</field>
+            <field name="model_id" ref="maintenance.model_pengajuan_jasa"/>
+            <field name="subject">Sudah Terjadwal--Permintaan {{ object.activity_type.name}} {{ object.name }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ object.sales.email_formatted }}</field>
+            <field name="email_cc">{{ (object.requester.email_formatted if object.requester != object.sales else '') }}, {{ ('abdulrozak@performaoptimagroup.com,yoki@performaoptimagroup.com' if object.man_power in ['presales', 'both'] else '') }}{{ (',admin.project@performaoptimagroup.com' if object.man_power in ['teknisi', 'both'] else '') }}{{ (',abdulrozak@performaoptimagroup.com,yoki@performaoptimagroup.com' if object.man_power in ['teknisi'] and object.activity_type.id in [16,12] else '') }}, {{ (object.presales.name.email_formatted if object.presales else '') }}, {{ (object.pic_teknisi.email_formatted if object.pic_teknisi else '') }}, {{ object._list_email_teknisi() }}</field>
+            <field name="description">Sent scheduled notification for PJ</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Team,<br /><br />
+                        Permintaan <t t-out="object.activity_type.name or ''">YourCompany</t> sudah dijadwalkan dengan detail sebagai berikut :<br />
+						 <br />
+						Nama Sales : <t t-out="object.sales.name or ''">NamaSales</t><br />
+						Instansi : <t t-out="object.partner.name or ''">Instansi</t><br />
+						Jadwal : <t t-out="format_datetime(dt=object.schedule_date, tz=object.sales.tz) or ''">Jadwal</t> -- Tiba Di Lokasi<br />
+						Detail Pekerjaan : <t t-out="object.job_description or ''">DetailPekerjaan</t><br />
+						<t t-if="object.presales"> PIC Presales : <t t-out="object.presales.name.name or ''">Presales</t><br /></t>
+						<t t-if="object.pic_teknisi"> PIC Teknisi : <t t-out="object.pic_teknisi.name or ''">PICTeknisi</t><br /></t>						
+						<t t-if="object.teknisi">Tambahan Teknisi :
+						<ul>
+							<li t-foreach="object.teknisi" t-as="teknisi">
+								<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>								
+									<span style="margin-left:5px" t-out="teknisi.name or ''">TambahanTeknisi</span>								
+							</li>
+						</ul></t>
+						 <br />
+						 
+						Untuk detail lebih lanjut akses link berikut :
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=auth" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo>
+		

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+		<!-- Req Transport Views -->
+
+	<record id="req_transport_tree" model="ir.ui.view">
+        <field name="name">req.transport.tree</field>
+        <field name="model">req.transport</field>
+        <field name="arch" type="xml">
+            <tree string="Request Transport">
+                <field name="name"/>
+                <field name="status_id"/>
+                <field name="requester"/>
+                <field name="car"/>
+                <field name="driver"/>
+                <field name="destination"/>
+            </tree>
+        </field>
+    </record>
+
+	<record id="req_transport_form" model="ir.ui.view">
+        <field name="name">req.transport.form</field>
+        <field name="model">req.transport</field>
+        <field name="arch" type="xml">
+            <form string="Request">
+				<sheet>
+                <header>/&gt;
+                    <button name="submit" string="Submit" type="object" invisible="status_id not in [1]"/>
+                    <button name="confirm" string="Confirm" type="object" invisible="status_id not in [3]"/>
+					<button string="Approve" name="request.transport_approval_list_action" type="action" invisible="status_id not in [2] or not is_approver"/>
+					<button string="Reject" name="request.transport_approval_list_action" type="action" invisible="status_id not in [2] or not is_approver" context="{'default_action': 'reject'}"/>
+                    <field name="status_id" widget="statusbar_duration"/>/&gt;
+                </header>
+				<span class="badge text-bg-dark float-end" invisible="not is_cancelled">Canceled</span><span class="badge text-bg-dark float-end" invisible="not is_rejected">Rejected</span><span class="badge text-bg-danger float-end" invisible="not is_urgent" style="font-size:30px">Urgent</span>
+                    <div class="oe_title">                        
+                        <h1>
+                            <span class="o_form_label">Request ID</span>
+                            <field name="name" readonly="True"/>
+                        </h1>
+                    </div>
+                    <group>
+						<field name="maintenance_team_id" invisible="True"/>                     
+						<field name="config_approval_id" invisible="True"/>                     
+						<field name="dummy_save" invisible="True"/>                     
+						<field name="is_approver" invisible="True"/>                       
+						<field name="is_cancelled" invisible="True"/>                       
+						<field name="is_rejected" invisible="True"/>                      
+						<field name="is_urgent" invisible="True"/>
+						<field name="stop" invisible="True"/>
+						<field name="stop_date" invisible="True"/>
+                    </group>
+					<notebook>
+                    <page name="details" string="Details">
+                        <group>
+                            <group>                           
+                                <field name="submit_date" invisible="not submit_date"/>
+                                <field name="request_type" readonly="status_id not in [1]"/>
+                                <field name="requester" options="{'no_create': True}"/>
+                                <field name="requester_department" options="{'no_open': True}" readonly="True"/>
+                                <field name="requester_job" options="{'no_open': True}" readonly="True"/>
+                                <field name="destination"/>
+                                <field name="agenda"/>
+                                <field name="other_passenger" options="{'no_create': True, 'no_open': True}" widget="many2many_tags"/>
+                                <field name="start" string="Schedule" required="not allday" widget="daterange" options="{'end_date_field': 'stop'}" invisible="allday"/>
+                                <field name="start_date" string="Schedule" required="allday" widget="daterange" options="{'end_date_field': 'stop_date'}" invisible="not allday"/>
+                                <label for="duration" class="fw-bold text-900 opacity-100"/>
+                                    <div class="d-flex gap-2">
+                                        <div class="d-flex align-items-start" invisible="allday">
+                                            <field name="duration" widget="float_time" string="Duration" class="oe_inline pe-2"/>
+                                            <span> hours</span>
+                                        </div>
+                                        <span invisible="allday" style="white-space: pre;"> or </span>
+                                        <div class="d-flex gap-2">
+                                            <label for="allday" class=""/>
+                                            <field name="allday" class="oe_inline" widget="boolean_toggle" force_save="1"/>
+                                        </div>
+                                    </div>
+								<field name="need_driver" widget="radio" options="{'horizontal': true}"/>
+                            </group>
+                            <group>
+                                <field name="pending_approver" options="{'no_create': True, 'no_open': True}" widget="many2many_tags" invisible="not pending_approver"/>
+                                <field name="driver" options="{'no_create': True, 'no_open': True}" invisible="need_driver in ['no']"/>
+                                <field name="car" options="{'no_create': True, 'no_open': True}"/>
+								<field name="license_plate" readonly="True"/>
+								<field name="transmission" readonly="True"/>
+								<field name="fuel_type" readonly="True"/>
+								<field name="seats" readonly="True" invisible="not seats"/>
+                            </group>
+                        </group>
+                        <div class="clearfix"/>
+                    </page>
+					<page string="Approval List">
+                        <field name="approval_list_ids">
+                            <tree delete="False" create="False" edit="False" editable="Bottom">
+                                <field name="name" readonly="True"/>
+                                <field name="approval_date" readonly="True"/>								
+                                <field name="action" readonly="True"/>								
+                                <field name="note"/>
+                            </tree>
+                        </field>
+                        <div class="clearfix"/>
+                    </page>
+					<page string="Time Tracking">
+                        <group>
+							<field name="create_date" readonly="True" string="Create On"/>
+							<field name="submit_date" readonly="True"/>
+							<field name="approve_date" readonly="True"/>
+							<field name="confirm_date" readonly="True"/>
+							<field name="close_date" readonly="True"/>
+                        </group>
+                    </page>
+					</notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>                
+            </form>
+        </field>
+    </record>
+	
+	<record id="req_transport_action" model="ir.actions.act_window">
+        <field name="name">Request Transport List</field>
+        <field name="res_model">req.transport</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="req_transport_tree"/>
+		<field name="context">{
+        }</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create New Request Now
+          </p>
+        </field>
+    </record>
+	
+				<!-- Approval -->
+		
+	<record id="transport_approval_list_form" model="ir.ui.view">
+        <field name="name">transport.approval.list.form</field>
+        <field name="model">transport.approval.list</field>
+		<field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <form string="Approve">
+                <separator string="Fill The Note If Necessary"/>
+                <group>
+                    <field name="transport_request_id" invisible="True"/>
+                    <field name="name" invisible="True"/>
+                    <field name="approval_date" invisible="True"/>
+                    <field name="action" required="True"/>
+                    <field name="note" class="w-100" required="action in ['reject']"/>
+                </group>
+                <footer>
+                    <button string="Submit" name="action_submit" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" class="oe_link" special="cancel" data-hotkey="x"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+	
+	<record id="transport_approval_list_action" model="ir.actions.act_window">
+        <field name="name">Transport Approval List</field>
+        <field name="res_model">transport.approval.list</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="transport_approval_list_form"/>
+		<field name="context">{
+            'default_transport_request_id': active_id
+        }</field>
+        <field name="target">new</field>
+    </record>
+	
+</odoo>

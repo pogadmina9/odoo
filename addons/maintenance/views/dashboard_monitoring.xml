@@ -1,0 +1,602 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- presales.team : views -->
+
+    <record id="presales_team_view_search" model="ir.ui.view">
+        <field name="name">presales.team.search</field>
+        <field name="model">presales.team</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field string="Name" name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="presales_team_kanban" model="ir.ui.view">
+        <field name="name">presales.team.kanban</field>
+        <field name="model">presales.team</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard o_maintenance_team_kanban" create="0">
+                <field name="name"/>
+                <field name="color"/>
+                <field name="project_count_ids"/>
+                <field name="project_count"/>
+                <field name="project_progress"/>
+                <field name="project_win"/>
+                <field name="project_lose"/>
+                <templates>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="#{!selection_mode ? kanban_color(record.color.raw_value) : ''}">
+                            <div t-attf-class="o_kanban_card_header">
+                                <div class="o_kanban_card_header_title">
+                                    <div class="o_primary">
+                                        <a name="1009" type="action" context="{'search_default_presales': id}">
+                                            <field name="name"/>
+                                        </a></div>
+                                </div>
+                            </div>
+                            <div class="container o_kanban_card_content">
+                                <div class="row">
+                                    <div class="col-6 o_kanban_primary_left">
+                                        <button class="btn btn-primary" name="1009" type="action" context="{'search_default_presales': id}">
+                                            <t t-esc="record.project_count.value"/> Project
+                                        </button>
+                                    </div>
+                                    <div class="col-6 o_kanban_primary_right">
+                                        <div t-if="record.project_progress.raw_value &gt; 0">
+                                            <a name="1009" type="action">
+                                            <t t-esc="record.project_progress.value"/>
+                                            In Progress
+                                            </a>
+                                        </div>
+                                        <div t-if="record.project_win.raw_value &gt; 0">
+                                            <a name="1009" type="action">
+                                            <t t-esc="record.project_win.value"/>
+                                            Win
+                                            </a>
+                                        </div>
+                                        <div t-if="record.project_lose.raw_value &gt; 0">
+                                            <a name="1009" type="action">
+                                            <t t-esc="record.project_lose.value"/>
+                                            Lose
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="presales_team_view_tree" model="ir.ui.view">
+        <field name="name">presales.team.tree</field>
+        <field name="model">presales.team</field>
+        <field name="arch" type="xml">
+            <tree string="Presales Team" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="presales_dashboard_action" model="ir.actions.act_window">
+        <field name="name">Presales Dashboard</field>
+        <field name="res_model">presales.team</field>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="presales_team_kanban"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Dashboard of Presales
+          </p>
+        </field>
+    </record>
+	
+	<record id="presales_team_action" model="ir.actions.act_window">
+        <field name="name">Presales Team</field>
+        <field name="res_model">presales.team</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="presales_team_view_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Team of Presales
+          </p>
+        </field>
+    </record>
+	
+	   <!-- presales.project.monitoring : views -->
+
+    <record id="presales_project_view_kanban" model="ir.ui.view">
+        <field name="name">presales.project.kanban</field>
+        <field name="model">presales.project.monitoring</field>
+        <field name="priority">16</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" sample="1" quick_create="false">
+                <field name="stage_id"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <b class="o_kanban_record_title"><field name="name"/></b>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <field name="create_date" widget="remaining_days"/><br/>
+                                    <span name="currency" invisible="True" t-if="record.currency_id.raw_value"><field name="currency_id"/><br/></span>
+                                    <span name="presales" t-if="record.presales.raw_value">Presales : <field name="presales"/><br/></span>
+                                    <span name="sales" t-if="record.sales.raw_value">Sales : <field name="sales"/> / <field name="no_ppc"/><br/></span>
+                                    <span name="partner" t-if="record.user.raw_value"><field name="user"/><br/></span>
+                                    <span class="oe_grey" t-if="record.estimate_amount.raw_value" invisible="stage_id in [4]">Estimasi : <field name="estimate_amount"/><br/></span>
+                                    <span class="oe_grey" t-if="record.deal_amount.raw_value">Deal Amount : <field name="deal_amount"/><br/></span>
+                                </div>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+	
+		   <!-- presales.project : views -->
+		   
+	<record id="presales_project_view_search" model="ir.ui.view">
+        <field name="name">presales.project.search</field>
+        <field name="model">presales.project.monitoring</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field name="presales"/>
+                <field name="sales"/>
+                <field name="no_ppc"/>
+                <field name="user"/>
+                <field name="stage_id"/>
+				<filter string="In Progress" name="in_progress" domain="[('stage_id.done', '=', False)]"/>
+                <separator/>
+				<filter string="Win" name="win" domain="[('stage_id.id', '=', '4')]"/>
+                <separator/>
+				<filter string="Lose" name="lose" domain="[('stage_id.id', '=', '5')]"/>
+                <separator/>
+            </search>
+        </field>
+    </record>
+	
+	<record id="presales_project_view_tree" model="ir.ui.view">
+        <field name="name">presales.project.tree</field>
+        <field name="model">presales.project.monitoring</field>
+        <field name="arch" type="xml">
+            <tree string="Presales Project" sample="1">                
+                <field name="name"/>
+				<field name="create_date"/>
+                <field name="stage_id"/>
+                <field name="presales"/>
+                <field name="sales"/>
+                <field name="no_ppc"/>
+                <field name="user"/>
+                <field name="estimate_date"/>
+                <field name="estimate_amount" widget="monetary"/>
+                <field name="currency_id" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+	
+    <record id="presales_project_view_form" model="ir.ui.view">
+        <field name="name">presales.project.form</field>
+        <field name="model">presales.project.monitoring</field>
+        <field name="arch" type="xml">
+            <form string="Project Register">
+                <header>
+					<button string="Write Review" name="write_review" type="object" invisible="check_sales in [False]"/>
+                    <field name="stage_id" widget="statusbar_duration" options="{'clickable': True}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Project"/>
+                        <h1>
+                            <field name="name" placeholder="e.g Pengadaan Server"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="request_date" readonly="True"/>
+                            <field name="stage_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="presales"/>
+                            <field name="sales" options="{'no_create': True, 'no_open': True}" domain="[('commercial_company_name', '=', False)]"/>
+                            <field name="check_sales" invisible="True"/>
+                            <field name="no_ppc"/>
+                            <field name="currency_id" invisible="True"/>
+                        </group>
+                       <group>
+                            <field name="user" context="{'res_partner_search_mode': 'customer', 'show_address': 1}" domain="[('commercial_company_name', '!=', False)]"/>
+                            <field name="contact_person" domain="[('commercial_company_name', '!=', False), ('parent_id', '!=', False)]"/>
+                            <field name="phone"/>
+                            <field name="estimate_amount" invisible="stage_id in [4]" widget="monetary"/>
+                            <field name="deal_amount" invisible="stage_id not in [4]" widget="monetary"/>
+                            <field name="estimate_date" invisible="stage_id in [5]"/>
+                            <field name="technical_status" invisible="stage_id not in [5]"/>
+                            <field name="lose_reason" invisible="stage_id not in [5]"/>
+                       </group>
+                    </group>
+                    <div>
+                        <label for="description" string="Project Detail / Note"/>
+                        <field name="description" string="Project Detail / Note" placeholder="..."/>
+                    </div>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+	
+	<record id="presales_project_view_graph" model="ir.ui.view">
+        <field name="name">presales.project.graph</field>
+        <field name="model">presales.project.monitoring</field>
+        <field name="arch" type="xml">
+            <graph string="maintenance Request" sample="1">
+                <field name="presales" string="Presales"/>
+                <field name="stage_id"/>
+                <field name="deal_amount"/>
+                <field name="currency_id" invisible="True"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="presales_project_action" model="ir.actions.act_window">
+        <field name="name">Project</field>
+        <field name="res_model">presales.project.monitoring</field>
+        <field name="view_mode">kanban,tree,graph,form</field>
+    </record>
+
+	   <!-- activity.type : views -->
+	
+	<record id="activity_type_tree" model="ir.ui.view">
+        <field name="name">activity.type.tree</field>
+        <field name="model">activity.type</field>
+        <field name="arch" type="xml">
+            <tree string="Activity Type" editable="top">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+				<field name="short_name"/>
+				<field name="used_in_jasa"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="activity_type_action" model="ir.actions.act_window">
+        <field name="name">Activity Type</field>
+        <field name="res_model">activity.type</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="activity_type_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Activity Type
+          </p>
+        </field>
+    </record>
+	
+	   <!-- presales.activity : views -->
+	
+	<record id="presales_activity_tree" model="ir.ui.view">
+        <field name="name">presales.activity.tree</field>
+        <field name="model">presales.activity</field>
+        <field name="arch" type="xml">
+            <tree string="Presales Activity" editable="top">
+                <field name="name"/>
+				<field name="activity"/>
+				<field name="date"/>
+				<field name="sales"/>
+				<field name="no_ppc"/>
+				<field name="user"/>
+				<field name="contact_person"/>
+				<field name="job_title" optional="hide"/>
+				<field name="phone" optional="hide"/>
+				<field name="detail"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="presales_activity_view_calendar" model="ir.ui.view">
+        <field name="name">presales.activity.calendar</field>
+        <field name="model">presales.activity</field>
+        <field name="arch" type="xml">
+            <calendar date_start="date" date_delay="duration" color="name" create="0" delete="0">
+                <field name="name" filters="1"/>
+				<field name="activity" filters="1"/>
+				<field name="user"/>
+				<field name="sales"/>
+				<field name="detail"/>
+            </calendar>
+        </field>
+    </record>
+	
+	<record id="presales_activity_view_form" model="ir.ui.view">
+        <field name="name">presales.activity.form</field>
+        <field name="model">presales.activity</field>
+        <field name="arch" type="xml">
+            <form string="Activity Record">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Presales"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+							<field name="activity"/>
+							<field name="date"/>
+							<field name="sales"/>
+							<field name="no_ppc"/>
+							<field name="user" domain="[('commercial_company_name', '!=', False)]"/>
+							<field name="contact_person" domain="[('commercial_company_name', '!=', False), ('parent_id', '!=', False)]"/>
+							<field name="job_title"/>
+							<field name="phone"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+	
+	<record id="presales_activity_action" model="ir.actions.act_window">
+        <field name="name">Presales Activity</field>
+        <field name="res_model">presales.activity</field>
+        <field name="view_mode">tree,calendar,form</field>
+        <field name="view_id" ref="presales_activity_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Presales Activity
+          </p>
+        </field>
+    </record>	
+	
+	   <!-- presales stage -->
+
+	<record id="presales_stage_view_tree" model="ir.ui.view">
+        <field name="name">presales.stage.tree</field>
+        <field name="model">presales.stage</field>
+        <field name="arch" type="xml">
+            <tree string="Presales Stage" editable="top">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="fold"/>
+                <field name="done"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="presales_stage_action" model="ir.actions.act_window">
+        <field name="name">Presales Stage</field>
+        <field name="res_model">presales.stage</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="presales_stage_view_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add a new presales stages
+          </p>
+        </field>
+    </record>
+	
+	   <!-- menu item -->
+	   
+	<record id="presales_review_view_form" model="ir.ui.view">
+        <field name="name">presales.review.form</field>
+        <field name="model">presales.review</field>
+        <field name="arch" type="xml">
+            <form string="Presales Review Form">
+                <separator string="Your Review is Valuable to Us"/>
+                <sheet>
+                    <group>
+                           <field name="no_ppc" readonly="True" invisible="True"/>
+                           <field name="name" readonly="True" invisible="True"/>
+				           <field name="create_date" readonly="True" invisible="True"/>
+				           <field name="rating" widget="priority"/>
+                           <field name="comment" class="w-100"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Submit" name="action_submit" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" class="oe_link" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+	
+	<record id="presales_review_view_tree" model="ir.ui.view">
+        <field name="name">presales.review.tree</field>
+        <field name="model">presales.review</field>
+        <field name="arch" type="xml">
+            <tree string="Review Record">
+                <field name="writer"/>
+                <field name="create_date"/>
+                <field name="name"/>
+                <field name="no_ppc"/>
+                <field name="rating" widget="priority" readonly="True"/>
+                <field name="comment"/>
+            </tree>
+        </field>
+    </record>
+	
+	
+	<record id="presales_review_wizard_action" model="ir.actions.act_window">
+        <field name="name">Presales Review</field>
+        <field name="res_model">presales.review</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="presales_review_view_form"/>
+        <field name="target">new</field>
+		<field name="context">{
+            'default_no_ppc': active_id
+        }</field>
+    </record>
+	
+	<record id="presales_review_record_action" model="ir.actions.act_window">
+        <field name="name">Review Record</field>
+        <field name="res_model">presales.review</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="presales_review_view_tree"/>
+    </record>
+	  
+	   <!-- skills matrix -->
+
+	<record id="skills_matrix_view_form" model="ir.ui.view">
+        <field name="name">skills.matrix.form</field>
+        <field name="model">skills.matrix</field>
+        <field name="arch" type="xml">
+            <form string="Add Skill">                
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Certification / Training for"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="brand"/>
+                            <field name="subject"/>
+							<field name="skill"/>
+                            <field name="type"/>
+                            <field name="issued_date"/>
+                            <field name="exp_date"/>
+                        </group>                       
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>                
+            </form>
+        </field>
+    </record>
+	
+	<record id="skills_matrix_view_tree" model="ir.ui.view">
+        <field name="name">skills.matrix.tree</field>
+        <field name="model">skills.matrix</field>
+        <field name="arch" type="xml">
+            <tree string="Skills Matrix">
+                <field name="name"/>
+                <field name="brand"/>
+                <field name="subject"/>
+                <field name="type"/>
+                <field name="issued_date"/>
+                <field name="exp_date"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="skills_matrix_action" model="ir.actions.act_window">
+        <field name="name">Skills Matrix</field>
+        <field name="res_model">skills.matrix</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="skills_matrix_view_tree"/>
+    </record>
+	
+	   <!-- skill category -->
+	
+	<record id="skill_category_view_tree" model="ir.ui.view">
+        <field name="name">skill.category.tree</field>
+        <field name="model">skill.category</field>
+        <field name="arch" type="xml">
+            <tree string="Skill Category" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="sub_cat" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="skill_category_action" model="ir.actions.act_window">
+        <field name="name">Skill Category</field>
+        <field name="res_model">skill.category</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="skill_category_view_tree"/>
+    </record>	
+	
+	   <!-- menu item -->
+
+    <menuitem
+        id="menu_presales_dashboard_title"
+        name="Presales Dashboard Old"
+        web_icon="maintenance,static/description/icon.png"
+		groups="group_presales_admin"
+        sequence="160"/>
+
+    <menuitem
+        id="menu_presales_dashboard"
+        name="Dashboard"
+        parent="menu_presales_dashboard_title"
+        groups="group_presales_admin,group_presales,group_approval_admin"
+        action="presales_dashboard_action"
+        sequence="0"/>
+		
+	<menuitem
+        id="menu_presales_activity"
+        name="Activity"
+        parent="menu_presales_dashboard_title"
+        groups="group_presales_admin,group_presales,group_approval_admin"
+        action="presales_activity_action"
+        sequence="2"/>
+		
+	<menuitem
+        id="menu_configuration"
+        name="Configuration"
+        parent="menu_presales_dashboard_title"
+        groups="group_presales_admin"
+        sequence="20"/>
+	<menuitem
+        id="menu_presales_stage"
+        name="Stage"
+        parent="menu_configuration"
+        groups="group_presales_admin"
+        action="presales_stage_action"
+        sequence="1"/>
+	<menuitem
+        id="menu_presales_team"
+        name="Team"
+        parent="menu_configuration"
+        groups="group_presales_admin"
+        action="presales_team_action"
+        sequence="2"/>
+	<menuitem
+        id="menu_activity_type"
+        name="Activity Type"
+        parent="menu_configuration"
+        groups="group_presales_admin"
+        action="activity_type_action"
+        sequence="3"/>
+	<menuitem
+        id="menu_skill_category"
+        name="Skill Category"
+        parent="menu_configuration"
+        groups="group_presales_admin"
+        action="skill_category_action"
+        sequence="4"/>
+	<menuitem
+        id="menu_review_record"
+        name="Review Record"
+        parent="menu_configuration"
+        groups="group_presales_admin"
+        action="presales_review_record_action"
+        sequence="5"/>
+		
+	<menuitem
+        id="menu_skills"
+        name="Skills Matrix"
+        parent="menu_presales_dashboard_title"
+        groups="group_presales,group_approval_admin"
+		action="skills_matrix_action"
+        sequence="3"/>
+
+</odoo>

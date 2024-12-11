@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+   	   <!-- Pengajuan Jasa -->
+	<record id="inh_pj_request_view_search" model="ir.ui.view">
+        <field name="name">inh.pj.request.search</field>
+        <field name="model">pengajuan.jasa</field>
+        <field name="inherit_id" ref="maintenance.pj_request_view_search"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//filter[@name='active']" position="after">
+                    <filter string="Approved" name="approved" domain="[('stage_pj_id', 'not in', [1,3]), ('archive', '=', 0)]"/>
+                </xpath>
+            </data>
+        </field>
+    </record>
+
+   	   <!-- Jadwal Teknisi -->
+
+	<record id="req_teknikal_schedule_tree" model="ir.ui.view">
+        <field name="name">req.teknikal.schedule.tree</field>
+        <field name="model">pengajuan.jasa</field>
+        <field name="arch" type="xml">
+            <tree string="Jadwal Teknisi Untuk Besok" default_order="schedule_date" default_group_by="activity_type" expand="True" create="0">
+                <field name="sales" optional="show"/>
+                <field name="partner"/>
+                <field name="schedule_date" string="Schedule Start"/>
+                <field name="schedule_end"/>
+                <field name="pic_teknisi"/>
+                <field name="teknisi" widget="many2many_tags"/>
+                <field name="job_description" optional="show"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="action_jadwal_teknisi_today" model="ir.actions.server">
+        <field name="name">Jadwal Teknisi Hari Ini</field>
+        <field name="model_id" ref="request.model_pengajuan_jasa"/>
+        <field name="state">code</field>
+        <field name="code">action = model.teknikal_schedule_today()</field>
+    </record>	
+	
+	<record id="action_jadwal_teknisi_tommorow" model="ir.actions.server">
+        <field name="name">Jadwal Teknisi Besok</field>
+        <field name="model_id" ref="request.model_pengajuan_jasa"/>
+        <field name="state">code</field>
+        <field name="code">action = model.teknikal_schedule_tommorow()</field>
+    </record>	
+	
+			<!-- Menu Inherit -->
+			
+	<menuitem
+        id="menu_req_presales_teknikal"
+        name="Presales &amp; Teknikal"
+        parent="maintenance.menu_maintenance_title"
+        sequence="1"/>
+				
+	<menuitem
+        id="menu_req_teknisi"
+        name="Teknisi"
+        parent="request.menu_req_presales_teknikal"
+        action="action_jadwal_teknisi_today"
+		sequence="1"/>
+		
+	<menuitem
+        id="menu_req_jadwal_teknisi_today"
+        name="Jadwal Hari Ini"
+        parent="request.menu_req_teknisi"
+        action="action_jadwal_teknisi_today"
+		sequence="1"/>
+		
+	<menuitem
+        id="menu_req_jadwal_teknisi_tommorow"
+        name="Jadwal Besok"
+        parent="request.menu_req_teknisi"
+        action="action_jadwal_teknisi_tommorow"
+		sequence="2"/>
+	
+</odoo>

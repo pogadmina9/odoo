@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+	<record id="action_report_kpi_xlsx" model="ir.actions.report">
+		<field name="name">Presales KPI Report</field>
+		<field name="model">presales.kpi</field>
+		<field name="report_type">xlsx</field>
+		<field name="report_name">dashboard_presales.report_name</field>
+		<field name="report_file">dashboard_presales.report_file</field>
+	</record>
+	
+</odoo>

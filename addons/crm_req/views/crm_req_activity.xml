@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="crm_req_activity_tree" model="ir.ui.view">
+        <field name="name">crm.req.activity.tree</field>
+        <field name="model">crm.presales.activity</field>
+        <field name="inherit_id" ref="crm.presales_activity_tree"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="request_id" readonly="True"/>
+                </xpath>
+            </data>
+        </field>
+    </record>
+	
+	<record id="crm_lead_form" model="ir.ui.view">
+        <field name="name">crm.lead.form</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//notebook/page[@name='internal_notes']" position="after">
+                    <page string="List Pengajuan Jasa">
+                            <field name="pj_ids" readonly="True">
+                            <tree>
+                                <field name="name" readonly="True"/>
+                                <field name="stage_pj_id" readonly="True"/>
+                                <field name="presales" readonly="True"/>
+                                <field name="teknisi" readonly="True" widget="many2many_tags"/>
+                                <field name="job_description" readonly="True"/>
+                            </tree>
+                            </field>
+                            <div class="clearfix"/>
+                        </page>
+                </xpath>
+            </data>
+        </field>
+    </record>
+</odoo>

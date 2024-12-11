@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">	
+	<record model="req.approval.config" id="req_approval_config1">
+        <field name="name">Config 1</field>
+    </record>
+	
+	<record model="req.team.config" id="req_team_config1">
+        <field name="name">Team Configuration</field>
+    </record>
+</odoo>

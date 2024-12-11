@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record model="manpower.status" id="manpower_status1">
+        <field name="name">Draft</field>
+        <field name="sequence">1</field>
+    </record>
+    <record model="manpower.status" id="manpower_status2">
+        <field name="name">Waiting Approval</field>
+        <field name="sequence">2</field>
+    </record>
+	<record model="manpower.status" id="manpower_status3">
+        <field name="name">New</field>
+        <field name="sequence">3</field>
+    </record>	
+	<record model="manpower.status" id="manpower_status4">
+        <field name="name">Job Vacancies</field>
+        <field name="sequence">4</field>
+    </record>
+	<record model="manpower.status" id="manpower_status5">
+        <field name="name">Screening</field>
+        <field name="sequence">5</field>
+    </record>
+	<record model="manpower.status" id="manpower_status6">
+        <field name="name">Interview</field>
+        <field name="sequence">6</field>
+    </record>
+	<record model="manpower.status" id="manpower_status7">
+        <field name="name">Offering Letter</field>
+        <field name="sequence">7</field>
+    </record>
+	<record model="manpower.status" id="manpower_status8">
+        <field name="name">Onboarding</field>
+        <field name="sequence">8</field>
+    </record>
+	<record model="manpower.status" id="manpower_status9">
+        <field name="name">Done</field>
+        <field name="done">True</field>
+        <field name="sequence">9</field>
+    </record>
+	
+	<!-- Candidate Screening Status -->
+	<record model="candidate.status" id="candidate_status1">
+        <field name="name">New</field>
+        <field name="sequence">1</field>
+    </record>
+    <record model="candidate.status" id="candidate_status2">
+        <field name="name">Psikotest</field>
+        <field name="sequence">2</field>
+    </record>
+	<record model="candidate.status" id="candidate_status3">
+        <field name="name">HR Interview</field>
+        <field name="sequence">3</field>
+    </record>		
+	<record model="candidate.status" id="candidate_status4">
+        <field name="name">Psikogram</field>
+        <field name="sequence">4</field>
+    </record>
+	<record model="candidate.status" id="candidate_status5">
+        <field name="name">User Review</field>
+        <field name="sequence">5</field>
+    </record>
+	<record model="candidate.status" id="candidate_status6">
+        <field name="name">1st User Interview</field>
+        <field name="sequence">6</field>
+    </record>
+	<record model="candidate.status" id="candidate_status7">
+        <field name="name">2nd User Interview</field>
+        <field name="sequence">7</field>
+    </record>
+	<record model="candidate.status" id="candidate_status8">
+        <field name="name">3rd User Interview</field>
+        <field name="sequence">8</field>
+    </record>
+	<record model="candidate.status" id="candidate_status9">
+        <field name="name">Final Interview</field>
+        <field name="sequence">9</field>
+    </record>
+	<record model="candidate.status" id="candidate_status10">
+        <field name="name">Offering Letter</field>
+        <field name="sequence">10</field>
+    </record>
+	<record model="candidate.status" id="candidate_status11">
+        <field name="name">Onboarding</field>
+        <field name="sequence">11</field>
+    </record>
+	<record model="candidate.status" id="candidate_status12">
+        <field name="name">Done</field>
+		<field name="done">True</field>
+        <field name="sequence">12</field>
+    </record>
+	
+	<!-- MPR Reason -->
+	<record model="mpr.reason" id="mpr_reason1">
+        <field name="name">Pengganti Karyawan Resign</field>
+        <field name="sequence">1</field>
+    </record>
+    <record model="mpr.reason" id="mpr_reason2">
+        <field name="name">Pengganti Karyawan Promosi</field>
+        <field name="sequence">2</field>
+    </record>
+	<record model="mpr.reason" id="mpr_reason3">
+        <field name="name">Pengganti Karyawan Demosi</field>
+        <field name="sequence">3</field>
+    </record>		
+	<record model="mpr.reason" id="mpr_reason4">
+        <field name="name">Pengganti Karyawan Mutasi</field>
+        <field name="sequence">4</field>
+    </record>
+	<record model="mpr.reason" id="mpr_reason5">
+        <field name="name">Pengganti Karyawan Pensiun</field>
+        <field name="sequence">5</field>
+    </record>
+	<record model="mpr.reason" id="mpr_reason6">
+        <field name="name">Pengganti Karyawan PHK</field>
+        <field name="sequence">6</field>
+    </record>
+	<record model="mpr.reason" id="mpr_reason7">
+        <field name="name">Mengisi Kebutuhan Organisasi</field>
+        <field name="sequence">7</field>
+    </record>
+	<record model="mpr.reason" id="mpr_reason8">
+        <field name="name">Lain-Lain</field>
+        <field name="sequence">8</field>
+    </record>
+	
+	
+	<!-- Interview Status -->
+	<record model="interview.status" id="interview_status1">
+        <field name="name">User Scheduling</field>
+        <field name="sequence">1</field>
+    </record>
+	<record model="interview.status" id="interview_status2">
+        <field name="name">Candidate Scheduling</field>
+        <field name="sequence">2</field>
+    </record>
+    <record model="interview.status" id="interview_status3">
+        <field name="name">Confirmed</field>
+        <field name="sequence">3</field>
+    </record>
+	<record model="interview.status" id="interview_status4">
+        <field name="name">Done</field>
+        <field name="sequence">4</field>
+        <field name="done">True</field>
+        <field name="fold">True</field>
+    </record>		
+	<record model="interview.status" id="interview_status5">
+        <field name="name">Cancelled</field>
+        <field name="sequence">5</field>
+        <field name="fold">True</field>
+    </record>		
+	
+	
+	<!-- Candidate Reject Reason -->
+	<record model="candidate.reject.reason" id="candidate_reject_reason1">
+        <field name="name">Tidak Ada Respon</field>
+        <field name="sequence">1</field>
+    </record>
+    <record model="candidate.reject.reason" id="candidate_reject_reason2">
+        <field name="name">Gaji / Benefit</field>
+        <field name="sequence">2</field>
+    </record>
+	<record model="candidate.reject.reason" id="candidate_reject_reason3">
+        <field name="name">Pengalaman Kurang</field>
+        <field name="sequence">3</field>
+    </record>		
+	<record model="candidate.reject.reason" id="candidate_reject_reason4">
+        <field name="name">Keahlian Kurang Cocok</field>
+        <field name="sequence">4</field>
+    </record>
+	<record model="candidate.reject.reason" id="candidate_reject_reason5">
+        <field name="name">Sudah Mendapat Pekerjaan</field>
+        <field name="sequence">5</field>
+    </record>
+	<record model="candidate.reject.reason" id="candidate_reject_reason6">
+        <field name="name">Lain-Lain</field>
+        <field name="sequence">6</field>
+    </record>
+	
+	<!-- Candidate Source -->
+	<record model="candidate.source" id="candidate_source1">
+        <field name="name">Jobstreet</field>
+        <field name="sequence">1</field>
+    </record>
+    <record model="candidate.source" id="candidate_source2">
+        <field name="name">LinkedIn</field>
+        <field name="sequence">2</field>
+    </record>
+	<record model="candidate.source" id="candidate_source3">
+        <field name="name">Glints</field>
+        <field name="sequence">3</field>
+    </record>		
+	<record model="candidate.source" id="candidate_source4">
+        <field name="name">Referral</field>
+        <field name="sequence">4</field>
+    </record>
+	<record model="candidate.source" id="candidate_source5">
+        <field name="name">Database</field>
+        <field name="sequence">5</field>
+    </record>
+	
+	<!-- Working Location -->
+	<record model="working.location" id="working_location1">
+        <field name="name">Surabaya</field>
+        <field name="sequence">1</field>
+    </record>
+    <record model="working.location" id="working_location2">
+        <field name="name">Tanggerang</field>
+        <field name="sequence">2</field>
+    </record>
+	<record model="working.location" id="working_location3">
+        <field name="name">Malang</field>
+        <field name="sequence">3</field>
+    </record>		
+	<record model="working.location" id="working_location4">
+        <field name="name">Bali</field>
+        <field name="sequence">4</field>
+    </record>
+	<record model="working.location" id="working_location5">
+        <field name="name">Solo</field>
+        <field name="sequence">5</field>
+    </record>
+	
+	<!-- Onboarding Item -->
+	<record model="onboarding.item" id="onboarding_item1">
+        <field name="name">Email Account</field>
+        <field name="sequence">1</field>
+    </record>
+    <record model="onboarding.item" id="onboarding_item2">
+        <field name="name">GreatDay Account</field>
+        <field name="sequence">2</field>
+    </record>
+	<record model="onboarding.item" id="onboarding_item3">
+        <field name="name">Performa Portal Account</field>
+        <field name="sequence">3</field>
+    </record>		
+	<record model="onboarding.item" id="onboarding_item4">
+        <field name="name">Accurate Credentials</field>
+        <field name="sequence">4</field>
+    </record>
+	<record model="onboarding.item" id="onboarding_item5">
+        <field name="name">ID Card</field>
+        <field name="sequence">5</field>
+    </record>
+	<record model="onboarding.item" id="onboarding_item6">
+        <field name="name">Kartu Nama</field>
+        <field name="sequence">6</field>
+    </record>
+	<record model="onboarding.item" id="onboarding_item7">
+        <field name="name">Notebook</field>
+        <field name="sequence">7</field>
+    </record>
+	<record model="onboarding.item" id="onboarding_item8">
+        <field name="name">Desktop</field>
+        <field name="sequence">8</field>
+    </record>
+	
+		<!-- Onboarding Status -->
+	<record model="onboarding.status" id="onboarding_status1">
+        <field name="name">New</field>
+        <field name="sequence">1</field>
+    </record>
+	<record model="onboarding.status" id="onboarding_status2">
+        <field name="name">In Progress</field>
+        <field name="sequence">2</field>
+    </record>
+    <record model="onboarding.status" id="onboarding_status3">
+        <field name="name">Done</field>
+        <field name="sequence">3</field>
+        <field name="done">True</field>
+        <field name="fold">True</field>
+    </record>
+	<record model="onboarding.status" id="onboarding_status4">
+        <field name="name">Not Applicable</field>
+        <field name="sequence">4</field>
+        <field name="done">True</field>
+        <field name="fold">True</field>
+    </record>		
+	
+	
+	<!-- Sequence -->
+	
+	<record id="seq_req_manpower" model="ir.sequence">
+		<field name="name">MPR Sequence</field>
+        <field name="code">mpr.seq</field>
+        <field name="prefix">MPR/%(y)s%(month)s%(day)s/</field>
+		<field name="padding">3</field>
+    </record>
+	
+	
+</odoo>

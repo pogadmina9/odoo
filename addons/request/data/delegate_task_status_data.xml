@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record model="delegate.task.status" id="delegate_task_status1">
+        <field name="name">Draft</field>
+        <field name="sequence">1</field>
+    </record>
+    <record model="delegate.task.status" id="delegate_task_status2">
+        <field name="name">Waiting Approval</field>
+        <field name="sequence">2</field>
+    </record>
+	<record model="delegate.task.status" id="delegate_task_status3">
+        <field name="name">Approved</field>
+		<field name="done">True</field>
+        <field name="sequence">3</field>
+    </record>	
+	<record model="delegate.task.status" id="delegate_task_status4">
+        <field name="name">Rejected</field>
+        <field name="fold">True</field>
+		<field name="done">True</field>
+        <field name="sequence">4</field>
+    </record>
+</odoo>

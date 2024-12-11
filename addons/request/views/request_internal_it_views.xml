@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+   	   <!-- Req IT Status -->
+
+	<record id="req_it_status_tree" model="ir.ui.view">
+        <field name="name">req.it.status.tree</field>
+        <field name="model">req.it.status</field>
+        <field name="arch" type="xml">
+            <tree string="Request IT Internal Status" editable="top">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="fold"/>
+                <field name="done"/>
+            </tree>
+        </field>
+    </record>   	   
+	
+	<record id="req_it_status_action" model="ir.actions.act_window">
+        <field name="name">Request IT Internal Status</field>
+        <field name="res_model">req.task.status</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="req_it_status_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Req IT Status
+          </p>
+        </field>
+    </record>
+	
+	
+	<!-- Req IT -->
+	
+	<record id="internal_it_search" model="ir.ui.view">
+        <field name="name">internal.it.search</field>
+        <field name="model">internal.it</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+				<field string="Requester" name="requester"/>
+				<field string="Assignee" name="assignee"/>
+                <field string="Location" name="location"/>
+				<field string="Problem" name="problem"/>
+				<filter string="My Request" name="my_request" domain="[('requester', '=', uid)]"/>
+                <separator/>
+				<filter string="Assigned to Me" name="my_assignment" domain="[('assignee', '=', uid)]"/>
+                <separator/>
+            </search>
+        </field>
+    </record>
+	
+	<record id="internal_it_kanban" model="ir.ui.view">
+        <field name="name">internal.it.kanban</field>
+        <field name="model">internal.it</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status_id" sample="1" quick_create="false" default_order="write_date desc">
+                <field name="status_id" readonly="True"/>
+                <field name="is_cancelled"/>
+                <field name="is_rejected"/>
+                <field name="submit_date"/>
+                <field name="finish_date"/>
+                <field name="assignee"/>
+                <field name="problem"/>
+                <templates>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                            <div class="oe_kanban_content" tooltip="kanban-tooltip">
+                                <div class="o_kanban_record_top_left">
+                                    <b class="o_kanban_record_title"><field name="name"/><span class="badge text-bg-dark float-end" invisible="not is_cancelled">Canceled</span><span class="badge text-bg-dark float-end" invisible="not is_rejected">Rejected</span></b>
+                                </div>
+                                <br/>
+                                <div class="o_kanban_record_body">
+                                    <span name="submit_date" t-if="record.submit_date.raw_value">Submit Date : <field name="submit_date"/><br/></span>
+                                    <span name="finish_date" t-if="record.finish_date.raw_value">Finish Date : <field name="finish_date"/><br/></span>
+                                    <span name="requester">Requester : <field name="requester"/><br/></span>
+                                    <span name="location">Location : <field name="location"/><br/></span>
+                                    <span name="problem">Problem : <field name="problem"/><br/></span>
+                                    <br/>
+                                </div>								
+                                <div class="o_kanban_record_bottom">
+                                    <br/>
+                                    <field name="assignee" widget="many2many_tags"/>                                                                         
+                                </div>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+	
+	<record id="internal_it_tree" model="ir.ui.view">
+        <field name="name">internal.it.tree</field>
+        <field name="model">internal.it</field>
+        <field name="arch" type="xml">
+            <tree string="Task List">
+                <field name="name"/>
+                <field name="submit_date"/>
+                <field name="received_date" optional="hide"/>
+                <field name="finish_date"/>
+                <field name="requester"/>
+                <field name="location"/>
+                <field name="problem"/>
+                <field name="assignee" widget="many2many_tags"/>
+				<field name="action" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="internal_it_form" model="ir.ui.view">
+        <field name="name">internal.it.form</field>
+        <field name="model">internal.it</field>
+        <field name="arch" type="xml">
+            <form string="Task Details">
+                <sheet>
+				<header>
+				    <button string="Save" name="save" type="object"/>
+				    <button string="Cancel" name="cancel" type="object" invisible="uid not in [requester] or status_id in [5,6] "/>
+				    <button string="Submit" name="submit" type="object" invisible="status_id not in [1]"/>
+				    <button string="Reopen" name="reopen" type="object" invisible="status_id not in [5]"/>
+					<field name="status_id" widget="statusbar_duration" invisible="not readonly"/>
+					<field name="status_id" widget="statusbar_duration" options="{'clickable': True}" invisible="readonly"/>
+                </header>				
+				<span class="badge text-bg-dark float-end" invisible="not is_cancelled">Canceled</span><span class="badge text-bg-dark float-end" invisible="not is_rejected">Rejected</span>
+                    <div class="oe_title">                        
+                        <h1>
+                            <span class="o_form_label">Request ID</span>
+                            <field name="name" readonly="True"/>
+                        </h1>
+                    </div>
+                    <group>
+						<field name="dummy_save" invisible="True"/>                        
+						<field name="initial_readonly" invisible="True"/>                       
+						<field name="readonly" invisible="True"/>                       
+						<field name="is_cancelled" invisible="True"/>                       
+						<field name="is_rejected" invisible="True"/>
+						<field name="create_date" invisible="True"/>
+						<field name="list_team" invisible="True"/>
+                    </group>
+					<notebook>
+                    <page name="details" string="Details">
+                        <group>
+                            <group>
+                                <field name="submit_date" invisible="not submit_date" readonly="True"/>
+                                <field name="config_team_id" invisible="True"/>
+                                <field name="maintenance_team_id" invisible="True"/>
+                                <field name="requester" options="{'no_create': True}" readonly="True" invisible="not initial_readonly or create_date" force_save="1"/>
+                                <field name="requester" options="{'no_create': True}" readonly="True" invisible="not create_date or not readonly" force_save="1"/>
+                                <field name="requester" options="{'no_create': True}" groups="request.group_internal_it_admin, request.group_internal_it_user" force_save="1"/>                                
+								<field name="location" readonly="readonly or status_id in [5,6]" required="True"/>
+								<field name="problem" readonly="readonly or status_id in [5,6]" required="True"/>
+								<field name="reopen_reason" invisible="not reopen_reason"/>
+                            </group>
+                            <group>
+								<field name="assignee" widget="many2many_tags" options="{'no_create': True}" readonly="readonly or status_id in [6]" invisible="status_id in [1]" domain="[('id', 'in', list_team)]"/>
+								<field name="action" readonly="readonly or status_id in [5,6]" invisible="status_id in [1]" required="status_id in [5,6]"/>
+								<field name="attachment_ids" widget="many2many_binary_preview"/>
+                            </group>
+                        </group>
+                        <br/>                        
+                        <div class="clearfix"/>
+                    </page>
+					<page string="Time Tracking">
+					    <group>
+                        <group>
+                            <field name="create_date" readonly="True" string="Create On"/>
+                            <field name="submit_date" readonly="True"/>
+                            <field name="received_date" readonly="True"/>
+                            <field name="finish_date" readonly="True"/>
+                            <field name="closed_date" readonly="True"/>
+                        </group>
+						<group>
+						    <field name="submit_to_finish_duration_value" invisible="True"/>
+							<field name="submit_to_finish_duration" readonly="True" forcesave="1"/>						
+						</group>
+						</group>
+                    </page>
+					</notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>                
+            </form>
+        </field>
+    </record>	
+	
+	<record id="internal_it_reopen_form" model="ir.ui.view">
+        <field name="name">internal.it.reopen.form</field>
+        <field name="model">internal.it</field>
+		<field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <form string="Reopen Reason">
+                <separator string="Please Fill The Reopen Reason"/>
+                <group>
+                    <field name="reopen_reason" class="w-100" string="Reason" required="True"/>
+                </group>
+                <footer>
+                    <button string="Submit" name="reopen" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" class="oe_link" special="cancel" data-hotkey="x"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+	
+	<record id="internal_it_action" model="ir.actions.act_window">
+        <field name="name">Internal IT Request List</field>
+        <field name="res_model">internal.it</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="internal_it_kanban"/>
+		<field name="context">{
+            
+        }</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create New Task Now
+          </p>
+        </field>
+    </record>
+	
+	<record id="create_internal_it_action" model="ir.actions.act_window">
+        <field name="name">Create Internal IT Request</field>
+        <field name="res_model">internal.it</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="internal_it_form"/>
+		<field name="context">{
+            
+        }</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create New Task Now
+          </p>
+        </field>
+    </record>
+
+	<!-- Menu Inherit -->
+	
+</odoo>

@@ -1,0 +1,609 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+   	   <!-- Purchasing Team -->
+	
+	<record id="purchasing_team_search" model="ir.ui.view">
+        <field name="name">purchasing.team.search</field>
+        <field name="model">purchasing.team</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field string="Purchasing" name="name"/>
+            </search>
+        </field>
+    </record>
+
+	<record id="purchasing_team_tree" model="ir.ui.view">
+        <field name="name">purchasing.team.tree</field>
+        <field name="model">purchasing.team</field>
+        <field name="arch" type="xml">
+            <tree string="Team Purchasing" editable="bottom">
+                <field name="name"/>
+                <field name="job_id"/>
+                <field name="controller"/>
+                <field name="archived"/>
+            </tree>
+        </field>
+    </record>
+
+	<record id="purchasing_team_kanban" model="ir.ui.view">
+        <field name="name">purchasing.team.kanban</field>
+        <field name="model">purchasing.team</field>
+        <field name="arch" type="xml">                
+            <kanban class="o_kanban_dashboard o_maintenance_team_kanban" create="0">
+                <field name="kb_sum_total_gap"/>
+                <field name="kb_count_po_controller"/>
+                <field name="kb_count_po_line_controller"/>
+                <field name="kb_count_po"/>
+                <field name="kb_count_po_line"/>
+                <field name="controller"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div>
+                            <div t-attf-class="o_kanban_card_header">
+                                <div class="o_kanban_card_header_title">
+                                    <div class="o_primary">
+                                            <field name="name"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="container o_kanban_card_content">
+                                <div class="row">
+                                    <div class="col-6 o_kanban_primary_left">
+                                        <button class="btn btn-primary" name="open_details" type="object">
+                                            See More Report
+                                        </button>                                        
+                                    </div>
+                                    <div class="col-6 o_kanban_primary_right">
+                                    <div invisible="not controller">
+                                        <a name="po_submit_today_list" type="object">
+                                            <t t-esc="record.kb_sum_total_gap.value"/>
+                                            Saved Today
+                                        </a>
+                                    </div>
+                                    <div invisible="not controller">
+                                        <a name="po_submit_today_list" type="object">
+                                            <t t-esc="record.kb_count_po_controller.value"/>
+                                            PO Checked Today
+                                        </a>
+                                    </div>
+                                    <div invisible="not controller">
+                                        <a name="po_item_submit_today_list" type="object">
+                                            <t t-esc="record.kb_count_po_line_controller.value"/>
+                                            PO Item Checked Today
+                                        </a>
+                                    </div>
+                                    <div invisible="controller">
+                                        <a name="po_submit_today_list" type="object">
+                                            <t t-esc="record.kb_count_po.value"/>
+                                            PO Submitted Today
+                                        </a>
+                                    </div>
+                                    <div t-if="record.kb_count_po.raw_value &gt; 0" invisible="not controller">
+                                        <a name="po_submit_today_list" type="object">
+                                            <t t-esc="record.kb_count_po.value"/>
+                                            PO Submitted Today
+                                        </a>
+                                    </div>
+                                    <div invisible="controller">
+                                        <a name="po_item_submit_today_list" type="object">
+                                            <t t-esc="record.kb_count_po_line.value"/>
+                                            PO Item Submitted Today
+                                        </a>
+                                    </div>
+                                    <div t-if="record.kb_count_po_line.raw_value &gt; 0" invisible="not controller">
+                                        <a name="po_item_submit_today_list" type="object">
+                                            <t t-esc="record.kb_count_po_line.value"/>
+                                            PO Item Submitted Today
+                                        </a>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+	
+	<record id="purchasing_team_form" model="ir.ui.view">
+        <field name="name">purchasing.team.form</field>
+        <field name="model">purchasing.team</field>
+        <field name="arch" type="xml">
+            <form string="Request Details">
+                <sheet>
+				<header>					
+                </header>
+                    <div class="oe_title">                        
+                        <h1>
+                            <field name="name" readonly="True"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="job_id" options="{'no_open': 1}"/>
+							<field name="controller" invisible="True"/>
+							<field name="time_filter_date_start" widget="daterange" options="{'end_date_field': 'time_filter_date_end', 'always_range': '1'}" invisible="time_filter_selection not in ['custom']" required="time_filter_selection in ['custom']"/>
+                            <field name="time_filter_date_end" invisible="True"/>
+                            <label for="time_filter_selection" string="Time Filter"/>
+                                <div class="o_row" invisible="controller">
+                                    <field name="time_filter_selection"/>
+                                    <button name="generate_statistics" type="object" string="Calculate"/>
+                                </div>
+                                <div class="o_row" invisible="not controller">
+                                    <field name="time_filter_selection"/>
+                                    <button name="generate_statistics_controller" type="object" string="Calculate"/>
+                                </div>
+							<separator string="Checker Report" invisible="not controller"/>
+							<field name="sum_total_gap" invisible="not controller"/>
+							<field name="average_checking_time_duration" invisible="not controller" readonly="True" force_save="1"/>
+							<field name="count_po_controller" invisible="not controller"/>
+							<field name="count_po_line_controller" invisible="not controller"/>
+                        </group>
+						<group>
+						    <separator string="Purchasing Report"/>
+							<field name="average_po_time_duration" readonly="True" force_save="1" groups="request.group_purchase_controller"/>
+							<field name="currency_id" invisible="True"/>
+							<field name="count_po"/>
+							<field name="count_po_error" groups="request.group_purchase_controller"/>
+							<field name="error_rate_po" widget="percentage" groups="request.group_purchase_controller"/>
+							<field name="count_po_line"/>
+							<field name="count_po_line_error" groups="request.group_purchase_controller"/>
+							<field name="error_rate_item" widget="percentage" groups="request.group_purchase_controller"/>
+						</group>
+                    </group>
+				<div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>                
+                </sheet>          
+            </form>
+        </field>
+    </record> 	   
+	
+	<record id="purchasing_team_kanban_action" model="ir.actions.act_window">
+        <field name="name">Purchasing Team</field>
+        <field name="res_model">purchasing.team</field>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="purchasing_team_kanban"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add Purchasing Team Now
+          </p>
+        </field>
+    </record>
+	
+	<record id="purchasing_team_detailed_action" model="ir.actions.act_window">
+        <field name="name">Detailed Report</field>
+        <field name="res_model">purchasing.team</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="purchasing_team_form"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add Purchasing Team Now
+          </p>
+        </field>
+    </record>
+	
+	<record id="purchasing_team_configuration_action" model="ir.actions.act_window">
+        <field name="name">Configuration</field>
+        <field name="res_model">purchasing.team</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="purchasing_team_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add Purchasing Team Now
+          </p>
+        </field>
+    </record>
+	
+	
+   	   <!-- Req Purchasing Status -->
+
+	<record id="req_purchasing_status_tree" model="ir.ui.view">
+        <field name="name">req.purchasing.status.tree</field>
+        <field name="model">req.purchasing.status</field>
+        <field name="arch" type="xml">
+            <tree string="Request Purchasing Status" editable="top">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="fold"/>
+                <field name="done"/>
+            </tree>
+        </field>
+    </record>   	   
+	
+	<record id="req_purchasing_status_action" model="ir.actions.act_window">
+        <field name="name">Purchasing Status</field>
+        <field name="res_model">req.purchasing.status</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="req_purchasing_status_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Purchasing Status
+          </p>
+        </field>
+    </record>
+	
+	
+	<!-- Purchasing Reject Reason -->
+
+	<record id="purchase_reject_reason_tree" model="ir.ui.view">
+        <field name="name">purchase.reject.reason.tree</field>
+        <field name="model">purchase.reject.reason</field>
+        <field name="arch" type="xml">
+            <tree string="Reject Reason" editable="top">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="purchase_reject_reason_action" model="ir.actions.act_window">
+        <field name="name">Reject Reason</field>
+        <field name="res_model">purchase.reject.reason</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="purchase_reject_reason_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Reject Reason
+          </p>
+        </field>
+    </record>
+
+	
+	<!-- Req Purchasing -->
+	
+	<record id="req_purchasing_search" model="ir.ui.view">
+        <field name="name">req.purchasing.search</field>
+        <field name="model">req.purchasing</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field string="Request ID" name="name"/>
+                <field string="Purchasing" name="purchasing_id"/>
+                <field string="Checker" name="checker"/>
+                <field string="Nomor PO" name="nomor_po"/>
+                <field string="Nomor Paket" name="nomor_paket"/>
+                <field string="Sales" name="sales"/>
+				<separator/>
+                <filter name="filter_submit_date" date="submit_date"/>
+            </search>
+        </field>
+    </record>
+	
+	<record id="req_purchasing_tree" model="ir.ui.view">
+        <field name="name">req.purchasing.tree</field>
+        <field name="model">req.purchasing</field>
+        <field name="arch" type="xml">
+            <tree string="Approval Purchase Order">
+                <field name="name"/>
+                <field name="purchasing_id"/>
+                <field name="nomor_paket"/>
+                <field name="nomor_po"/>
+                <field name="checker"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="req_purchasing_view_kanban" model="ir.ui.view">
+        <field name="name">req.purchasing.kanban</field>
+        <field name="model">req.purchasing</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status_id" sample="1" quick_create="false" default_order="is_urgent desc, submit_date">
+                <field name="status_id" readonly="True"/>
+                <field name="color"/>
+                <field name="is_urgent"/>
+                <field name="progress_note"/>
+                <field name="currency_id"/>
+                <field name="rev_number"/>
+                <templates>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                            <div class="oe_kanban_content" tooltip="kanban-tooltip">
+                                <div class="o_kanban_record_top_left">
+                                    <b class="o_kanban_record_title"><field name="name"/><span class="badge text-bg-warning float-end" invisible="rev_number in [0]">Revision</span><span class="badge text-bg-danger float-end" invisible="not is_urgent">Urgent</span></b>
+                                </div>
+                                <br/>
+                                <div class="o_kanban_record_body">
+                                    <span name="submit_date">Submit Date : <field name="submit_date"/><br/></span>
+                                    <span name="closed_date" t-if="record.closed_date.raw_value">Closed Date : <field name="closed_date"/><br/></span>
+                                    <span name="team_purchasing">Purchasing : <field name="purchasing_id"/><br/></span>
+                                    <span name="nomor_po">Nomor PO : <field name="nomor_po"/><br/></span>
+                                    <span name="nomor_paket">Nomor Paket : <field name="nomor_paket"/><br/></span>
+                                    <span name="checker" t-if="record.checker.raw_value">Checker : <field name="checker"/><br/></span>
+                                    <span name="grand_total_gap" t-if="record.grand_total_gap.raw_value">Total Gap : <field name="grand_total_gap"/><br/></span>
+                                    <br/>
+                                    <span name="progress_note" t-if="record.progress_note.raw_value" invisible="status_id not in [3]"><field name="progress_note"/><br/></span>
+                                </div>								
+                                <div class="o_kanban_record_bottom">                                    
+                                    <field name="reject_reason_id" widget="many2many_tags" readonly="True"/>
+                                </div>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+	
+	<record id="req_purchasing_form" model="ir.ui.view">
+        <field name="name">req.purchasing.form</field>
+        <field name="model">req.purchasing</field>
+        <field name="arch" type="xml">
+            <form string="Request Details">
+                <sheet>
+				<header>
+				    <button string="Save" name="save" type="object"/>
+				    <button string="Cancel" name="cancel" type="object" invisible="status_id in [3,4,5]"/>
+					<button string="Submit" name="submit" type="object" invisible="status_id not in [1]"/>
+				    <button string="Receive" name="receive" type="object" invisible="status_id not in [2]" groups="request.group_purchase_controller"/>
+				    <button string="Approve" name="approve" type="object" invisible="status_id not in [3]" groups="request.group_purchase_controller"/>
+				    <button string="Reject" name="reject" type="object" invisible="status_id not in [3]" groups="request.group_purchase_controller"/>
+				    <field name="status_id" widget="statusbar_duration"/>
+                </header>
+				<span class="badge text-bg-warning float-end" invisible="rev_number in [0]">Revision</span><span class="badge text-bg-dark float-end" invisible="not is_cancelled">Cancelled</span>
+                    <div class="oe_title">                        
+                        <h1>
+                            <field name="name" readonly="True"/>
+                        </h1>
+                    </div>
+                    <group>
+						<field name="is_cancelled" invisible="True"/>
+						<field name="rev_number" invisible="True"/>
+						<field name="url_local" invisible="True"/>
+						<field name="url_public" invisible="True"/>
+						<field name="pti" invisible="True"/>
+						<field name="dummy_save" invisible="True"/>
+						<field name="currency_id" invisible="True"/>
+						<field name="readonly" invisible="True"/>
+                        <field name="parent_id" invisible="True"/>
+                        <group>
+                            <field name="submit_date" readonly="True"/>
+                            <field name="receive_date" invisible="not receive_date" readonly="True"/>
+                            <field name="closed_date" invisible="not closed_date" readonly="True"/>
+                            <field name="purchasing_id" options="{'no_create': True, 'no_open': True}" readonly="uid not in [48]"/>
+                            <field name="nomor_paket" readonly="status_id not in [1] and readonly" required="True"/>
+							<field name="sales" readonly="status_id not in [1] and readonly" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="nomor_po" readonly="status_id not in [1] and readonly" required="True"/>
+                            <field name="vendor" readonly="status_id not in [1] and readonly" required="True"/>
+                            <field name="purchasing_note" readonly="status_id not in [1] and readonly" placeholder="Contoh: Vendor free ongkir sedangkan lainnya tidak"/>
+                        </group>
+						<group>
+                            <field name="checker" readonly="uid not in [48]" force_save="1"/>
+							<field name="progress_note" readonly="uid not in [48] or readonly" force_save="1"/>
+                            <field name="grand_total_gap" invisible="not grand_total_gap"/>
+							<field name="reject_reason_id" invisible="not reject_reason_id" widget="many2many_tags" readonly="True" force_save="1" options="{'no_create': True, 'no_open': True}"/>
+							<field name="attachment_ids" widget="many2many_binary_preview" required="pti"/>
+                        </group>
+                    </group>
+					<notebook>
+                    <page string="Purchase Order Line">
+						<field name="purchase_line_ids" readonly="uid not in [48] or readonly" force_save="1">
+                            <tree editable="Bottom">
+                                <field name="name" optional="hide" groups="request.group_purchase_controller"/>
+                                <field name="purchasing_id" optional="hide" groups="request.group_purchase_controller"/>
+                                <field name="nomor_paket" optional="hide" groups="request.group_purchase_controller"/>
+                                <field name="nomor_po" optional="hide" groups="request.group_purchase_controller"/>
+                                <field name="product"/>
+                                <field name="quantity" string="Qty"/>
+                                <field name="hpp_product"/>
+                                <field name="hpp_controller"/>
+                                <field name="gap" groups="request.group_purchase_controller"/>
+                                <field name="sub_total_gap"/>
+                                <field name="reject_reason_id" widget="many2many_tags"/>
+                                <field name="note"/>
+                                <field name="req_po_date" optional="hide" groups="request.group_purchase_controller"/>
+                                <field name="req_po_approve_date" optional="hide" groups="request.group_purchase_controller"/>
+                                <field name="currency_id" column_invisible="True"/>
+                            </tree>
+                        </field>
+                        <div class="clearfix"/>
+                    </page>
+					<page string="History">
+						<field name="history_rec" readonly="uid not in [48]" force_save="1">
+                            <tree>
+                                <field name="name" optional="show"/>
+                                <field name="status_id" optional="show"/>
+                                <field name="purchasing_id" optional="show"/>
+                                <field name="nomor_paket" optional="show"/>
+                                <field name="nomor_po" optional="show"/>
+                                <field name="grand_total_gap" optional="hide"/>
+                                <field name="reject_reason_id" widget="many2many_tags"/>
+                                <field name="currency_id" column_invisible="True"/>
+                            </tree>
+                        </field>
+					</page>
+					<page string="Other Info" groups="request.group_purchase_controller">
+						<form string="Request Details">
+							<group>
+								<group>
+									<field name="req_po_date"/>
+									<field name="req_po_approve_date"/>
+								</group>
+							</group>
+						</form>
+					</page>
+					</notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>                
+            </form>
+        </field>
+    </record>
+	
+	<record id="req_purchasing_action" model="ir.actions.act_window">
+        <field name="name">Approval Purchase Order</field>
+        <field name="res_model">req.purchasing</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="req_purchasing_view_kanban"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Approval Purchase Order
+          </p>
+        </field>
+    </record>
+
+	<record id="create_req_purchasing_action" model="ir.actions.act_window">
+        <field name="name">Approval Purchase Order</field>
+        <field name="res_model">req.purchasing</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="req_purchasing_form"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create Approval Purchase Order
+          </p>
+        </field>
+    </record>
+
+   	   <!-- Purchasing Line -->
+
+	<record id="purchasing_line_search" model="ir.ui.view">
+        <field name="name">purchasing.line.search</field>
+        <field name="model">purchasing.line</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field string="Request ID" name="name"/>
+                <field string="Purchasing" name="purchasing_id"/>
+                <field string="Checker" name="checker"/>
+                <field string="Nomor PO" name="nomor_po"/>
+                <field string="Vendor" name="vendor"/>
+                <field string="Nomor Paket" name="nomor_paket"/>
+                <field string="Sales" name="sales"/>
+                <field string="Product" name="product"/>
+				<separator/>
+                <filter name="filter_submit_date" date="submit_date"/>
+            </search>
+        </field>
+    </record>
+
+	<record id="req_purchasing_line_tree" model="ir.ui.view">
+        <field name="name">purchasing.line.tree</field>
+        <field name="model">purchasing.line</field>
+        <field name="arch" type="xml">
+            <tree string="Purchase Item">
+                <field name="name" optional="hide"/>
+                <field name="purchasing_id"/>
+                <field name="submit_date"/>
+                <field name="req_po_date" optional="hide" groups="request.group_purchase_controller"/>
+                <field name="req_po_approve_date" optional="hide" groups="request.group_purchase_controller"/>
+                <field name="nomor_paket" optional="hide"/>
+                <field name="sales" optional="hide" groups="request.group_purchase_controller"/>
+                <field name="nomor_po" optional="show"/>
+                <field name="vendor"/>
+                <field name="product"/>
+                <field name="quantity" optional="show"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="hpp_product" optional="show"/>
+                <field name="hpp_controller" optional="show"/>
+                <field name="gap" optional="hide"/>
+                <field name="sub_total_gap" optional="show"/>
+                <field name="checker" optional="show"/>
+                <field name="reject_reason_id" widget="many2many_tags" optional="show"/>
+                <field name="note" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+	<record id="purchasing_line_form" model="ir.ui.view">
+        <field name="name">purchasing.line.form</field>
+        <field name="model">purchasing.line</field>
+        <field name="arch" type="xml">
+            <form string="Purchase Order Line">
+                <sheet>				
+                    <div class="oe_title">                        
+                        <h1>
+                            <field name="product" readonly="True"/>
+                        </h1>
+                    </div>
+                    <group>
+						<field name="currency_id" invisible="True"/>
+						<group>
+                            <field name="submit_date"/>
+                            <field name="name" readonly="True"/>
+                            <field name="purchasing_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="nomor_paket"/>
+                            <field name="nomor_po"/>
+							<field name="sales" options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+						<group>
+                            <field name="checker"/>
+							<field name="vendor" options="{'no_create': True, 'no_open': True}" readonly="True"/>
+							<field name="hpp_product" invisible="hpp_product in [0]"/>
+                            <field name="hpp_controller" invisible="hpp_controller in [0]"/>
+							<field name="quantity" invisible="quantity in [0]"/>
+							<field name="gap" invisible="not gap"/>
+							<field name="sub_total_gap" invisible="not sub_total_gap"/>
+							<field name="reject_reason_id" invisible="not reject_reason_id" widget="many2many_tags"/>
+							<field name="note"/>
+                        </group>
+                        <separator string="Time Tracking"/>
+                        <group>    
+                            <field name="req_po_date"/>
+							<field name="req_po_approve_date"/>
+                            <field name="submit_date"/>
+							<field name="closed_date"/>
+						</group>
+						<group>    
+							<field name="req_po_approved_duration_value" invisible="True"/>
+						    <field name="approved_to_submit_duration_value" invisible="True"/>
+                            <field name="req_po_approved_duration" readonly="True" force_save="1"/>
+							<field name="approved_to_submit_duration" readonly="True" force_save="1"/>
+                            <field name="submit_to_checked_duration" readonly="True" force_save="1"/>
+						</group>
+                    </group>
+                </sheet>                                
+            </form>
+        </field>
+    </record>
+	
+	<record id="req_purchasing_line_action" model="ir.actions.act_window">
+        <field name="name">Purchase Order Line</field>
+        <field name="res_model">purchasing.line</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="req_purchasing_line_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Purchasing Status
+          </p>
+        </field>
+    </record>
+	
+	
+			<!-- Menu Inherit -->
+			
+	<menuitem
+        id="menu_req_purchasing"
+        name="Purchasing"
+        parent="maintenance.menu_maintenance_title"
+        sequence="2"/>
+		
+	<menuitem
+        id="menu_req_purchasing_team"
+        name="Report"
+        parent="request.menu_req_purchasing"
+        groups="request.group_purchase_controller,request.group_purchasing"
+        action="purchasing_team_kanban_action"
+        sequence="1"/>
+		
+	<menuitem
+        id="menu_req_purchasing_line"
+        name="Purchase Line"
+        parent="request.menu_req_purchasing"
+        groups="request.group_purchase_controller,request.group_purchasing"
+        action="req_purchasing_line_action"
+        sequence="2"/>	
+		
+	<menuitem
+        id="menu_req_purchasing_configuration"
+        name="Configuration"
+        parent="request.menu_req_purchasing"
+        groups="request.group_purchase_controller"
+        action="purchasing_team_configuration_action"
+        sequence="3"/>
+	
+</odoo>

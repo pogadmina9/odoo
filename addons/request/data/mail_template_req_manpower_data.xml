@@ -1,0 +1,1697 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+	<!-- Email template for new MPR & Need Approval -->
+	
+	
+	
+        <record id="need_approval_mpr" model="mail.template">
+            <field name="name">Need Approval MPR</field>
+            <field name="model_id" ref="request.model_req_manpower"/>
+            <field name="subject">Need Approval: Manpower Request {{ (object.name) }} from {{ (object.create_uid.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ object.next_approver.work_email}}</field>
+            <field name="email_cc">{{ (object.create_uid.email_formatted) }}; {{ (object.direct_upline.work_email if object.direct_upline != object.requester and object.direct_upline not in object.pending_approver else '') }}</field>
+            <field name="description">Sent approval notification for new MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-if="not object.next_approver"> Leaders</t><t t-if="object.next_approver"><t t-out="object.next_approver.name or ''">Approver</t></t>,<br /><br />
+                        Terdapat permintaan manpower baru untuk tim Anda dari <t t-out="object.requester.name or ''">Requester</t> dengan informasi sebagai berikut :<br />
+						 <br />
+						Position : <t t-out="object.job_position or ''">Posisi</t><br />
+						Direct Upline : <t t-out="object.direct_upline.name or ''">DirectUpline</t><br />
+						Department : <t t-out="object.candidate_department.display_name or ''">Department</t><br />
+						Quantity : <t t-out="object.quantity or ''">Quantity</t><br />
+						Deadline : <t t-out="object.deadline or ''">Deadline</t><br />
+						 <br />						 
+						Segera review dan approve / reject untuk melanjutkan.  <br />	
+						Silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		
+		<!-- Email template for new MPR  -->
+		
+		
+		
+        <record id="new_mpr" model="mail.template">
+            <field name="name">New MPR</field>
+            <field name="model_id" ref="request.model_req_manpower"/>
+            <field name="subject">New Manpower Request {{ (object.name) }} from {{ (object.create_uid.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">career@performaoptimagroup.com</field>
+            <field name="email_cc">{{ (object.create_uid.email_formatted) }}; {{ (object.direct_upline.work_email if object.direct_upline != object.requester else '') }}</field>
+            <field name="description">Sent notification for new MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Recruitment Team,<br /><br />
+                        Terdapat permintaan manpower baru dari <t t-out="object.requester.name or ''">Requester</t> dengan informasi sebagai berikut :<br />
+						 <br />
+						Position : <t t-out="object.job_position or ''">Posisi</t><br />
+						Direct Upline : <t t-out="object.direct_upline.name or ''">DirectUpline</t><br />
+						Department : <t t-out="object.candidate_department.display_name or ''">Department</t><br />
+						Quantity : <t t-out="object.quantity or ''">Quantity</t><br />
+						Deadline : <t t-out="object.deadline or ''">Deadline</t><br />
+						 <br />						 
+						Segera proses permintaan tersebut dengan akses link berikut :<br />	
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+
+
+		<!-- Email template for cancelled MPR -->
+		
+		
+		
+        <record id="cancel_mpr" model="mail.template">
+            <field name="name">Cancel MPR</field>
+            <field name="model_id" ref="request.model_req_manpower"/>
+            <field name="subject">Cancelled: Manpower Request {{ (object.name) }} from {{ (object.create_uid.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">career@performaoptimagroup.com; {{ (object.create_uid.email_formatted) }}; {{ (object.direct_upline.work_email if object.direct_upline != object.requester else '') }}</field>
+            <field name="description">Sent notification for cancelled MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Permintaan manpower <t t-out="object.name or ''">ID</t> untuk <t t-out="object.job_position or ''">Posisi</t> telah dibatalkan.<br />
+						<br />
+						Cancelled By : <t t-out="object.write_uid.name or ''">Canceler</t><br />
+						Cancel Reason : <t t-out="object.cancel_reason or ''">Reason</t><br />
+						 <br />
+						Informasi lebih lanjut silahkan akses link berikut :<br />	
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+
+
+		<!-- Email template for rejected MPR -->
+		
+		
+		
+        <record id="reject_mpr" model="mail.template">
+            <field name="name">Reject MPR</field>
+            <field name="model_id" ref="request.model_manpower_approval_list"/>
+            <field name="subject">Rejected: Manpower Request {{ (object.manpower_request_id.name) }} from {{ (object.manpower_request_id.create_uid.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">career@performaoptimagroup.com; {{ (object.manpower_request_id.create_uid.email_formatted) }}; {{ (object.manpower_request_id.direct_upline.work_email if object.manpower_request_id.direct_upline != object.manpower_request_id.requester else '') }}</field>
+            <field name="description">Sent notification for rejected MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Permintaan manpower <t t-out="object.manpower_request_id.name or ''">ID</t> untuk <t t-out="object.manpower_request_id.job_position or ''">Posisi</t> telah ditolak.<br />
+						<br />
+						Rejected By : <t t-out="object.name.name or ''">Rejector</t><br />
+						Reject Reason : <t t-out="object.note or ''">Reason</t><br />
+						 <br />
+						Informasi lebih lanjut silahkan akses link berikut :<br />	
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.manpower_request_id.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+
+
+	<!-- Email template for user review MPR -->
+	
+	
+	
+        <record id="user_review_mpr" model="mail.template">
+            <field name="name">User Review MPR</field>
+            <field name="model_id" ref="request.model_candidate_screening"/>
+            <field name="subject">Need Review: {{ (object.name) }} for {{ (object.job_position) }} ({{ (object.manpower_request_id.name) }})</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ object.manpower_request_id.create_uid.email_formatted}}</field>
+            <field name="email_cc">career@performaoptimagroup.com; {{ (object.manpower_request_id.direct_upline.work_email if object.manpower_request_id.direct_upline != object.manpower_request_id.requester else '') }}</field>
+            <field name="description">Sent notification for new user review MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Name</t>
+						<br/>
+						<t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.manpower_request_id.create_uid.name or ''">Requester</t>,<br /><br />
+                        Terdapat kandidat baru yang perlu Anda review dengan informasi sebagai berikut :<br />
+						 <br />
+						Name : <t t-out="object.name or ''">Name</t><br />
+						Position : <t t-out="object.job_position or ''">Posisi</t><br />
+						Age : <t t-out="object.age or ''">Age</t> Year's<br />
+						Gender : <t t-out="object.gender or ''">Gender</t><br />
+						Education : <t t-out="object.education or ''">Education</t><br />
+						Experience : <t t-out="object.experience or ''">Experience</t><br />
+						<t t-if="object.skill"> Skill : 
+						<ul>
+							<li t-foreach="object.skill" t-as="skill">
+								<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+								<t t-if="skill.name">
+									<span style="margin-left:5px" t-out="skill.name.name or ''">ListSkill</span> - <span style="margin-left:5px" t-out="skill.level or ''">Level</span>
+								</t>
+							</li>
+						</ul>
+						</t>
+						 <br />						 
+						Segera review dan approve / reject untuk melanjutkan.  <br />	
+						Silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		
+	<!-- Email template for rejected candidate MPR -->
+	
+	
+	
+        <record id="candidate_reject_mpr" model="mail.template">
+            <field name="name">Candidate Reject MPR</field>
+            <field name="model_id" ref="request.model_candidate_screening"/>
+            <field name="subject">Rejected: {{ (object.name) }} for {{ (object.job_position) }} ({{ (object.manpower_request_id.name) }})</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">career@performaoptimagroup.com; {{ (object.manpower_request_id.direct_upline.work_email if object.manpower_request_id.direct_upline != object.manpower_request_id.requester else '') }}; {{ object.manpower_request_id.create_uid.email_formatted}}</field>
+            <field name="description">Sent notification for rejected candidate MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Name</t>
+						<br/>
+						<t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Kandidat telah di reject dengan informasi sebagai berikut :<br />
+						 <br />
+						Name : <t t-out="object.name or ''">Name</t><br />
+						Position : <t t-out="object.job_position or ''">Posisi</t><br />
+						Last Status : <t t-out="object.status_id.name or ''">Last Status</t><br />
+						Reject By : <t t-out="object.reject_by or ''">RejectBy</t><br />
+						Reject Reason : <t t-out="object.reject_reason.name or ''">RejectReason</t><br />
+						<t t-if="object.other_reject_reason"> Other Reason : <t t-out="object.other_reject_reason or ''">OtherReason</t></t>
+						 <br />						 
+						Informasi lebih lanjut silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		
+		<!-- Email template for new MPR  -->
+		
+		
+		
+        <record id="new_mpr" model="mail.template">
+            <field name="name">New MPR</field>
+            <field name="model_id" ref="request.model_req_manpower"/>
+            <field name="subject">New Manpower Request {{ (object.name) }} from {{ (object.create_uid.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">career@performaoptimagroup.com</field>
+            <field name="email_cc">{{ (object.create_uid.email_formatted) }}; {{ (object.direct_upline.work_email if object.direct_upline != object.requester else '') }}</field>
+            <field name="description">Sent notification for new MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Recruitment Team,<br /><br />
+                        Terdapat permintaan manpower baru dari <t t-out="object.requester.name or ''">Requester</t> dengan informasi sebagai berikut :<br />
+						 <br />
+						Position : <t t-out="object.job_position or ''">Posisi</t><br />
+						Direct Upline : <t t-out="object.direct_upline.name or ''">DirectUpline</t><br />
+						Department : <t t-out="object.candidate_department.display_name or ''">Department</t><br />
+						Quantity : <t t-out="object.quantity or ''">Quantity</t><br />
+						Deadline : <t t-out="object.deadline or ''">Deadline</t><br />
+						 <br />						 
+						Segera proses permintaan tersebut dengan akses link berikut :<br />	
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+
+
+	<!-- Email template for confirmation of new interview -->
+	
+	
+	
+        <record id="mpr_interview_schedule" model="mail.template">
+            <field name="name">New Interview MPR</field>
+            <field name="model_id" ref="request.model_candidate_interview"/>
+            <field name="subject">Need Confirmation: Interview Schedule for {{ (object.screening_id.name) }} ({{ (object.manpower_request_id.name) }})</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ object._list_email_pending_confirm()}}</field>
+            <field name="email_cc">career@performaoptimagroup.com</field>
+            <field name="description">Sent confirmation notification for new interview</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.screening_id.name or ''">Name</t>
+                        <br/><t t-out="object.manpower_request_id.job_position or ''">Position</t>
+                        <br/><t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Terdapat jadwal interview untuk posisi <t t-out="object.manpower_request_id.job_position or ''">Position</t> dengan informasi sebagai berikut :<br />
+						<br />
+						<table border="0" cellpadding="0" cellspacing="0"><tr>
+						<td width="130px;" style="min-width: 130px;">
+							<div style="border-top-start-radius: 3px; border-top-end-radius: 3px; font-size: 12px; border-collapse: separate; text-align: center; font-weight: bold; color: #ffffff; min-height: 18px; background-color: #875A7B; border: 1px solid #875A7B;">
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='EEEE', lang_code=object.env.lang) or ''">Tuesday</t>
+							</div>
+							<div style="font-size: 48px; min-height: auto; font-weight: bold; text-align: center; color: #5F5F5F; background-color: #F8F8F8; border: 1px solid #875A7B;">
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='d', lang_code=object.env.lang) or ''">4</t>
+							</div>
+							<div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; background-color: #875A7B;'>
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='MMMM y', lang_code=object.env.lang) or ''">May 2021</t>
+							</div>
+							<div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-end-radius: 3px; font-weight: bold ; border: 1px solid #875A7B; border-bottom-start-radius: 3px;">
+								<t t-if="object.stop">
+									<div>
+										<t t-out="format_time(time=object.start, tz=object.write_uid.tz, time_format='short', lang_code=object.env.lang) or ''">11:00 AM</t>
+									</div>
+									<t t-if="object.write_uid.tz">
+										<div style="font-size: 10px; font-weight: normal">
+											(<t t-out="object.write_uid.tz or ''">Europe/Brussels</t>)
+										</div>
+									</t>
+								</t>
+							</div>
+						</td>
+						<td width="20px;"/>
+						<td style="padding-top: 5px;">
+							<p><strong>Details of the interview</strong></p>
+							<ul>
+								<t t-if="object.manpower_request_id">
+									<li>MPR ID : <t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+									</li>
+								</t>
+								<t t-if="object.screening_id.name">
+									<li>Candidate Name : <t t-out="object.screening_id.name or ''">Candidate Name</t>
+									</li>
+								</t>
+								<t t-if="object.candidate_status_id.name">
+									<li>Stage : <t t-out="object.candidate_status_id.name or ''">Stage</t>
+									</li>
+								</t>
+								<t t-if="object.interview_mode">
+									<li>Mode : <t t-out="object.interview_mode or ''">Mode</t>
+									</li>
+								</t>
+								<t t-if="object.duration">
+									<li>Duration : <t t-out="('%dH %02dM' % (object.duration,round(object.duration*60)%60)) or ''">0H30</t></li>
+								</t>
+								<li>Interviewers
+								<ul>
+									<li t-foreach="object.interviewers" t-as="interviewers">
+										<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+										<t t-if="interviewers.name">
+											<span style="margin-left:5px" t-out="interviewers.name or ''">Mitchell Admin</span>
+										</t>
+									</li>
+								</ul></li>
+							</ul>
+						</td>
+					</tr></table>
+						 <br />						 
+						Segera berikan action dengan cara akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		
+	<!-- Email template for updated interview schedule -->
+	
+	
+	
+        <record id="mpr_interview_schedule_updated" model="mail.template">
+            <field name="name">New Interview MPR (Updated)</field>
+            <field name="model_id" ref="request.model_candidate_interview"/>
+            <field name="subject">(Updated) Need Confirmation: Interview Schedule for {{ (object.screening_id.name) }} ({{ (object.manpower_request_id.name) }})</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">career@performaoptimagroup.com; {{ object._list_email_pending_confirm()}}</field>
+            <field name="description">Sent confirmation notification for updated interview</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.screening_id.name or ''">Name</t>
+                        <br/><t t-out="object.manpower_request_id.job_position or ''">Position</t>
+                        <br/><t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Terdapat pembaharuan jadwal interview untuk posisi <t t-out="object.manpower_request_id.job_position or ''">Position</t> dengan informasi sebagai berikut :<br />
+						<br />
+						<table border="0" cellpadding="0" cellspacing="0"><tr>
+						<td width="130px;" style="min-width: 130px;">
+							<div style="border-top-start-radius: 3px; border-top-end-radius: 3px; font-size: 12px; border-collapse: separate; text-align: center; font-weight: bold; color: #ffffff; min-height: 18px; background-color: #875A7B; border: 1px solid #875A7B;">
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='EEEE', lang_code=object.env.lang) or ''">Tuesday</t>
+							</div>
+							<div style="font-size: 48px; min-height: auto; font-weight: bold; text-align: center; color: #5F5F5F; background-color: #F8F8F8; border: 1px solid #875A7B;">
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='d', lang_code=object.env.lang) or ''">4</t>
+							</div>
+							<div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; background-color: #875A7B;'>
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='MMMM y', lang_code=object.env.lang) or ''">May 2021</t>
+							</div>
+							<div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-end-radius: 3px; font-weight: bold ; border: 1px solid #875A7B; border-bottom-start-radius: 3px;">
+								<t t-if="object.stop">
+									<div>
+										<t t-out="format_time(time=object.start, tz=object.write_uid.tz, time_format='short', lang_code=object.env.lang) or ''">11:00 AM</t>
+									</div>
+									<t t-if="object.write_uid.tz">
+										<div style="font-size: 10px; font-weight: normal">
+											(<t t-out="object.write_uid.tz or ''">Europe/Brussels</t>)
+										</div>
+									</t>
+								</t>
+							</div>
+						</td>
+						<td width="20px;"/>
+						<td style="padding-top: 5px;">
+							<p><strong>Details of the interview</strong></p>
+							<ul>
+								<t t-if="object.manpower_request_id">
+									<li>MPR ID : <t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+									</li>
+								</t>
+								<t t-if="object.screening_id.name">
+									<li>Candidate Name : <t t-out="object.screening_id.name or ''">Candidate Name</t>
+									</li>
+								</t>
+								<t t-if="object.candidate_status_id.name">
+									<li>Stage : <t t-out="object.candidate_status_id.name or ''">Stage</t>
+									</li>
+								</t>
+								<t t-if="object.interview_mode">
+									<li>Mode : <t t-out="object.interview_mode or ''">Mode</t>
+									</li>
+								</t>
+								<t t-if="object.duration">
+									<li>Duration : <t t-out="('%dH %02dM' % (object.duration,round(object.duration*60)%60)) or ''">0H30</t></li>
+								</t>
+								<li>Interviewers
+								<ul>
+									<li t-foreach="object.interviewers" t-as="interviewers">
+										<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+										<t t-if="interviewers.name">
+											<span style="margin-left:5px" t-out="interviewers.name or ''">Mitchell Admin</span>
+										</t>
+									</li>
+								</ul></li>
+							</ul>
+						</td>
+					</tr></table>
+						 <br />						 
+						Hiraukan email ini jika telah melakukan konfirmasi. <br />
+						Jika belum, segera berikan action dengan cara akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		
+			<!-- Email template for need candidate confirm interview schedule -->
+	
+	
+	
+        <record id="mpr_interview_candidate_confirmation" model="mail.template">
+            <field name="name">Need Candidate Confirmation Interview MPR</field>
+            <field name="model_id" ref="request.model_candidate_interview"/>
+            <field name="subject">Need {{ (object.screening_id.name) }} Confirmation for {{ (object.candidate_status_id.name) }} ({{ (object.manpower_request_id.name) }})</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">career@performaoptimagroup.com</field>
+            <field name="description">Sent notification for candidate interview confirmation</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.screening_id.name or ''">Name</t>
+                        <br/><t t-out="object.manpower_request_id.job_position or ''">Position</t>
+                        <br/><t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Mohon dibantu konfirmasi kepada <t t-out="object.screening_id.name or ''">Position</t> untuk jadwal interview sebagai berikut :<br />
+						<br />
+						<table border="0" cellpadding="0" cellspacing="0"><tr>
+						<td width="130px;" style="min-width: 130px;">
+							<div style="border-top-start-radius: 3px; border-top-end-radius: 3px; font-size: 12px; border-collapse: separate; text-align: center; font-weight: bold; color: #ffffff; min-height: 18px; background-color: #875A7B; border: 1px solid #875A7B;">
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='EEEE', lang_code=object.env.lang) or ''">Tuesday</t>
+							</div>
+							<div style="font-size: 48px; min-height: auto; font-weight: bold; text-align: center; color: #5F5F5F; background-color: #F8F8F8; border: 1px solid #875A7B;">
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='d', lang_code=object.env.lang) or ''">4</t>
+							</div>
+							<div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; background-color: #875A7B;'>
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='MMMM y', lang_code=object.env.lang) or ''">May 2021</t>
+							</div>
+							<div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-end-radius: 3px; font-weight: bold ; border: 1px solid #875A7B; border-bottom-start-radius: 3px;">
+								<t t-if="object.stop">
+									<div>
+										<t t-out="format_time(time=object.start, tz=object.write_uid.tz, time_format='short', lang_code=object.env.lang) or ''">11:00 AM</t>
+									</div>
+									<t t-if="object.write_uid.tz">
+										<div style="font-size: 10px; font-weight: normal">
+											(<t t-out="object.write_uid.tz or ''">Europe/Brussels</t>)
+										</div>
+									</t>
+								</t>
+							</div>
+						</td>
+						<td width="20px;"/>
+						<td style="padding-top: 5px;">
+							<p><strong>Details of the interview</strong></p>
+							<ul>
+								<t t-if="object.manpower_request_id">
+									<li>MPR ID : <t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+									</li>
+								</t>
+								<t t-if="object.screening_id.name">
+									<li>Candidate Name : <t t-out="object.screening_id.name or ''">Candidate Name</t>
+									</li>
+								</t>
+								<t t-if="object.candidate_status_id.name">
+									<li>Stage : <t t-out="object.candidate_status_id.name or ''">Stage</t>
+									</li>
+								</t>
+								<t t-if="object.interview_mode">
+									<li>Mode : <t t-out="object.interview_mode or ''">Mode</t>
+									</li>
+								</t>
+								<t t-if="object.interview_mode == 'Online'">
+									<li>URL : <t t-out="object.interview_url or ''">URL</t>
+									</li>
+								</t>
+								<t t-if="object.duration">
+									<li>Duration : <t t-out="('%dH %02dM' % (object.duration,round(object.duration*60)%60)) or ''">0H30</t></li>
+								</t>
+								<li>Interviewers
+								<ul>
+									<li t-foreach="object.interviewers" t-as="interviewers">
+										<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+										<t t-if="interviewers.name">
+											<span style="margin-left:5px" t-out="interviewers.name or ''">Mitchell Admin</span>
+										</t>
+									</li>
+								</ul></li>
+							</ul>
+						</td>
+					</tr></table>
+						 <br />						 
+						Untuk informasi lebih lanjut silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		
+			<!-- Email template for confirmed interview schedule -->
+	
+	
+	
+        <record id="mpr_interview_schedule_confirmed" model="mail.template">
+            <field name="name">Confirmed Interview MPR</field>
+            <field name="model_id" ref="request.model_candidate_interview"/>
+            <field name="subject">Confirmed: Interview Schedule for {{ (object.screening_id.name) }} ({{ (object.manpower_request_id.name) }})</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ object._list_email_interviewer()}}</field>
+            <field name="email_cc">career@performaoptimagroup.com</field>
+            <field name="description">Sent notification for confirmed interview</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.screening_id.name or ''">Name</t>
+                        <br/><t t-out="object.manpower_request_id.job_position or ''">Position</t>
+                        <br/><t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Jadwal interview untuk kandidat <t t-out="object.manpower_request_id.job_position or ''">Position</t> telah terkonfirmasi dengan informasi sebagai berikut :<br />
+						<br />
+						<table border="0" cellpadding="0" cellspacing="0"><tr>
+						<td width="130px;" style="min-width: 130px;">
+							<div style="border-top-start-radius: 3px; border-top-end-radius: 3px; font-size: 12px; border-collapse: separate; text-align: center; font-weight: bold; color: #ffffff; min-height: 18px; background-color: #875A7B; border: 1px solid #875A7B;">
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='EEEE', lang_code=object.env.lang) or ''">Tuesday</t>
+							</div>
+							<div style="font-size: 48px; min-height: auto; font-weight: bold; text-align: center; color: #5F5F5F; background-color: #F8F8F8; border: 1px solid #875A7B;">
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='d', lang_code=object.env.lang) or ''">4</t>
+							</div>
+							<div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; background-color: #875A7B;'>
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='MMMM y', lang_code=object.env.lang) or ''">May 2021</t>
+							</div>
+							<div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-end-radius: 3px; font-weight: bold ; border: 1px solid #875A7B; border-bottom-start-radius: 3px;">
+								<t t-if="object.stop">
+									<div>
+										<t t-out="format_time(time=object.start, tz=object.write_uid.tz, time_format='short', lang_code=object.env.lang) or ''">11:00 AM</t>
+									</div>
+									<t t-if="object.write_uid.tz">
+										<div style="font-size: 10px; font-weight: normal">
+											(<t t-out="object.write_uid.tz or ''">Europe/Brussels</t>)
+										</div>
+									</t>
+								</t>
+							</div>
+						</td>
+						<td width="20px;"/>
+						<td style="padding-top: 5px;">
+							<p><strong>Details of the interview</strong></p>
+							<ul>
+								<t t-if="object.manpower_request_id">
+									<li>MPR ID : <t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+									</li>
+								</t>
+								<t t-if="object.screening_id.name">
+									<li>Candidate Name : <t t-out="object.screening_id.name or ''">Candidate Name</t>
+									</li>
+								</t>
+								<t t-if="object.candidate_status_id.name">
+									<li>Stage : <t t-out="object.candidate_status_id.name or ''">Stage</t>
+									</li>
+								</t>
+								<t t-if="object.interview_mode">
+									<li>Mode : <t t-out="object.interview_mode or ''">Mode</t>
+									</li>
+								</t>
+								<t t-if="object.interview_mode == 'Online'">
+									<li>URL : <t t-out="object.interview_url or ''">URL</t>
+									</li>
+								</t>
+								<t t-if="object.duration">
+									<li>Duration : <t t-out="('%dH %02dM' % (object.duration,round(object.duration*60)%60)) or ''">0H30</t></li>
+								</t>
+								<li>Interviewers
+								<ul>
+									<li t-foreach="object.interviewers" t-as="interviewers">
+										<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+										<t t-if="interviewers.name">
+											<span style="margin-left:5px" t-out="interviewers.name or ''">Mitchell Admin</span>
+										</t>
+									</li>
+								</ul></li>
+							</ul>
+						</td>
+					</tr></table>
+						 <br />						 
+						Untuk informasi lebih lanjut silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		
+					<!-- Email template for reminder interview schedule -->
+	
+	
+	
+        <record id="mpr_reminder_interview_schedule" model="mail.template">
+            <field name="name">Reminder Interview MPR</field>
+            <field name="model_id" ref="request.model_candidate_interview"/>
+            <field name="subject">Reminder: Interview Schedule for {{ (object.screening_id.name) }} ({{ (object.manpower_request_id.name) }})</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ object._list_email_interviewer()}}</field>
+            <field name="email_cc">career@performaoptimagroup.com</field>
+            <field name="description">Sent notification for reminder interview</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.screening_id.name or ''">Name</t>
+                        <br/><t t-out="object.manpower_request_id.job_position or ''">Position</t>
+                        <br/><t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Hari ini ada jadwal interview untuk kandidat <t t-out="object.manpower_request_id.job_position or ''">Position</t> dengan informasi sebagai berikut :<br />
+						<br />
+						<table border="0" cellpadding="0" cellspacing="0"><tr>
+						<td width="130px;" style="min-width: 130px;">
+							<div style="border-top-start-radius: 3px; border-top-end-radius: 3px; font-size: 12px; border-collapse: separate; text-align: center; font-weight: bold; color: #ffffff; min-height: 18px; background-color: #875A7B; border: 1px solid #875A7B;">
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='EEEE', lang_code=object.env.lang) or ''">Tuesday</t>
+							</div>
+							<div style="font-size: 48px; min-height: auto; font-weight: bold; text-align: center; color: #5F5F5F; background-color: #F8F8F8; border: 1px solid #875A7B;">
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='d', lang_code=object.env.lang) or ''">4</t>
+							</div>
+							<div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; background-color: #875A7B;'>
+								<t t-out="format_datetime(dt=object.start, tz=object.write_uid.tz, dt_format='MMMM y', lang_code=object.env.lang) or ''">May 2021</t>
+							</div>
+							<div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-end-radius: 3px; font-weight: bold ; border: 1px solid #875A7B; border-bottom-start-radius: 3px;">
+								<t t-if="object.stop">
+									<div>
+										<t t-out="format_time(time=object.start, tz=object.write_uid.tz, time_format='short', lang_code=object.env.lang) or ''">11:00 AM</t>
+									</div>
+									<t t-if="object.write_uid.tz">
+										<div style="font-size: 10px; font-weight: normal">
+											(<t t-out="object.write_uid.tz or ''">Europe/Brussels</t>)
+										</div>
+									</t>
+								</t>
+							</div>
+						</td>
+						<td width="20px;"/>
+						<td style="padding-top: 5px;">
+							<p><strong>Details of the interview</strong></p>
+							<ul>
+								<t t-if="object.manpower_request_id">
+									<li>MPR ID : <t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+									</li>
+								</t>
+								<t t-if="object.screening_id.name">
+									<li>Candidate Name : <t t-out="object.screening_id.name or ''">Candidate Name</t>
+									</li>
+								</t>
+								<t t-if="object.candidate_status_id.name">
+									<li>Stage : <t t-out="object.candidate_status_id.name or ''">Stage</t>
+									</li>
+								</t>
+								<t t-if="object.interview_mode">
+									<li>Mode : <t t-out="object.interview_mode or ''">Mode</t>
+									</li>
+								</t>
+								<t t-if="object.interview_mode == 'Online'">
+									<li>URL : <t t-out="object.interview_url or ''">URL</t>
+									</li>
+								</t>
+								<t t-if="object.duration">
+									<li>Duration : <t t-out="('%dH %02dM' % (object.duration,round(object.duration*60)%60)) or ''">0H30</t></li>
+								</t>
+								<li>Interviewers
+								<ul>
+									<li t-foreach="object.interviewers" t-as="interviewers">
+										<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+										<t t-if="interviewers.name">
+											<span style="margin-left:5px" t-out="interviewers.name or ''">Mitchell Admin</span>
+										</t>
+									</li>
+								</ul></li>
+							</ul>
+						</td>
+					</tr></table>
+						 <br />						 
+						Jangan lupa input hasil interview setelah melakukan interview. <br />
+						Untuk informasi lebih lanjut silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		
+			<!-- Email template for reminder interview result -->
+	
+	
+	
+        <record id="mpr_reminder_interview_result" model="mail.template">
+            <field name="name">Reminder Interview Result MPR</field>
+            <field name="model_id" ref="request.model_candidate_interview"/>
+            <field name="subject">Reminder: {{ (object.candidate_status_id.name) }} Result for {{ (object.screening_id.name) }} ({{ (object.manpower_request_id.name) }})</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ object._list_interview_result_reminder()}}</field>
+            <field name="email_cc">career@performaoptimagroup.com</field>
+            <field name="description">Sent notification for reminder interview result</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.screening_id.name or ''">Name</t>
+                        <br/><t t-out="object.manpower_request_id.job_position or ''">Position</t>
+                        <br/><t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Jangan lupa untuk mengisi hasil <t t-out="object.candidate_status_id.name or ''">Stage</t> kandidat <t t-out="object.screening_id.name or ''">Kandidat</t>.<br />
+						<br />
+						Silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+
+
+	<!-- Email template for OL reminder MPR -->
+	
+	
+	
+        <record id="reminder_offering_letter_mpr" model="mail.template">
+            <field name="name">Reminder Offering Letter MPR</field>
+            <field name="model_id" ref="request.model_candidate_screening"/>
+            <field name="subject">Reminder: Offering Letter {{ (object.name) }} for {{ (object.job_position) }} ({{ (object.manpower_request_id.name) }})</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">career@performaoptimagroup.com</field>
+            <field name="description">Sent notification for reminder OL MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Name</t>
+						<br/>
+						<t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Mohon untuk follow up offering letter <t t-out="object.name or ''">Name</t>.<br />
+						 <br />						 
+						Silahkan akses link berikut untuk melakukan update : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+
+
+	<!-- Email template for onboarding MPR -->
+	
+	
+	
+        <record id="reminder_onboarding_mpr" model="mail.template">
+            <field name="name">Reminder Onboarding MPR</field>
+            <field name="model_id" ref="request.model_candidate_screening"/>
+            <field name="subject">Onboarding Preparation {{ (object.name) }} for {{ (object.job_position) }} ({{ (object.manpower_request_id.name) }})</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object._list_email_pic_onboarding()) }}</field>
+            <field name="email_cc">career@performaoptimagroup.com</field>
+            <field name="description">Sent notification for reminder onboarding MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Name</t>
+						<br/>
+						<t t-out="object.manpower_request_id.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Mohon untuk melakukan persiapan onboarding dengan informasi sebagai berikut :<br />
+						 <br />
+						Employee Name : <t t-out="object.name or ''">Name</t><br/>
+						Company : <t t-out="object.company.name or ''">Company</t><br/>
+						Position : <t t-out="object.job_position or ''">Position</t><br/>
+						Department : <t t-out="object.manpower_request_id.candidate_department.display_name or ''">Department</t><br />
+						Join Date : <t t-out="object.join_date or ''">JoinDate</t><br/>
+						<br />
+						Silahkan akses link berikut untuk melakukan update : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_onboarding"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		
+		<!-- Email template for closed MPR  -->
+		
+		
+		
+        <record id="done_mpr" model="mail.template">
+            <field name="name">Request Done MPR</field>
+            <field name="model_id" ref="request.model_req_manpower"/>
+            <field name="subject">Done: Manpower Request {{ (object.name) }} from {{ (object.create_uid.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.create_uid.email_formatted) }}; {{ (object.direct_upline.work_email if object.direct_upline != object.requester else '') }}</field>
+            <field name="email_cc">career@performaoptimagroup.com</field>
+            <field name="description">Sent notification for done MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Manpower request sudah terpenuhi. Berikut ini adalah list karyawan baru untuk posisi <t t-out="object.job_position or ''">Posisi</t> :<br />
+						 <br />
+						<ul>
+							<li t-foreach="object.candidate_ol_ids" t-as="onboarding">
+								<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+									<t t-if="onboarding.name">
+										<span style="margin-left:5px" t-out="onboarding.name.name or ''">Candidate</span>
+									</t>
+									<ul>
+										<li t-foreach="onboarding.name" t-as="name">
+											<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+												<t t-if="name">
+												Company : <span style="margin-left:5px" t-out="name.company.name or ''">Company</span>
+										</t>
+										</li>
+									</ul>
+									<ul>
+										<li t-foreach="onboarding.name" t-as="name">
+											<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+												<t t-if="name">
+												Status : <span style="margin-left:5px" t-out="name.ol_status or ''">Status</span>
+										</t>
+										</li>
+									</ul>
+									<ul>
+										<li t-foreach="onboarding.name" t-as="name">
+											<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+												<t t-if="name">
+												Duration : <span style="margin-left:5px" t-out="name.ol_duration or ''">Duration</span> Month's
+										</t>
+										</li>
+									</ul>
+									<ul>
+										<li t-foreach="onboarding.name" t-as="name">
+											<div t-attf-style="display: inline-block; border-radius: 50%; width: 10px; height: 10px;"> </div>
+												<t t-if="name">
+												Join Date : <span style="margin-left:5px" t-out="name.join_date or ''">JoinDate</span>
+										</t>
+										</li>
+										<br />
+									</ul>
+							</li>
+						</ul>					 
+						Terima kasih atas seluruh partisipasinya dalam proses recruitment.<br />	
+						Untuk informasi lebih lanjut silahkan akses link berikut :<br />	
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+
+
+		
+	</data>
+</odoo>
+		

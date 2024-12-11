@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+{
+    'name': 'Request',
+    'description': 'Request System',
+    'version': '1.0',
+    'category': 'Productivity/Request',
+    'author': 'Ricky Raymond',
+    'depends': ['mail', 'maintenance', 'crm', 'hr', 'fleet'],
+    'data': [
+        'data/data.xml',
+        'data/purchase_status_data.xml',
+        'data/task_status_data.xml',
+        'data/delegate_task_status_data.xml',
+        'data/manpower_request_data.xml',
+        'data/request_sequence_data.xml',
+        'data/reject_reason_data.xml',
+        'data/mail_template_req_manpower_data.xml',
+        'data/mail_template_req_task_data.xml',
+        'data/mail_template_check_purchase_data.xml',
+        'security/req_manpower.xml',
+        'security/req_access_group.xml',
+        'security/ir.model.access.csv',
+        'views/request_config_views.xml',
+        'views/request_purchasing_views.xml',
+        'views/request_presales_teknikal.xml',
+        'views/request_task_views.xml',
+        'views/request_internal_it_views.xml',
+        'views/request_transport_views.xml',
+        'views/request_manpower_views.xml',
+    ],
+    'installable': True,
+    'application': True,    
+    'license': 'AGPL-3',
+}

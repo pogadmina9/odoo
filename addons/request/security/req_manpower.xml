@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="group_mpr_admin" model="res.groups">
+        <field name="name">MPR Admin</field>
+        <field name="category_id" ref="base.module_category_productivity_request"/>
+        <field name="comment">The user will be able to manage MPR request.</field>
+    </record>
+
+    <record id="group_mpr_team" model="res.groups">
+        <field name="name">MPR Team</field>
+        <field name="category_id" ref="base.module_category_productivity_request"/>
+        <field name="comment">The user will be able to collaborate in MPR request.</field>
+    </record>
+
+    <record id="group_manager_bod" model="res.groups">
+        <field name="name">Manager and BOD</field>
+        <field name="category_id" ref="base.module_category_productivity_request"/>
+        <field name="comment">The user will be listed as Manager and BOD.</field>
+    </record>
+
+    <record id="group_supervisor" model="res.groups">
+        <field name="name">Supervisor</field>
+        <field name="category_id" ref="base.module_category_productivity_request"/>
+        <field name="comment">The user will be listed as Supervisor.</field>
+    </record>
+
+</odoo>

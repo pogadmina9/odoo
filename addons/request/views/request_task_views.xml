@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+   	   <!-- Req Task Status -->
+
+	<record id="req_task_status_tree" model="ir.ui.view">
+        <field name="name">req.task.status.tree</field>
+        <field name="model">req.task.status</field>
+        <field name="arch" type="xml">
+            <tree string="Task Request Status" editable="top">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="fold"/>
+                <field name="done"/>
+                <field name="todo"/>
+                <field name="ga"/>
+                <field name="internal_it"/>
+                <field name="fleet"/>
+            </tree>
+        </field>
+    </record>   	   
+	
+	<record id="req_task_status_action" model="ir.actions.act_window">
+        <field name="name">Task Status</field>
+        <field name="res_model">req.task.status</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="req_task_status_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Task Status
+          </p>
+        </field>
+    </record>
+	
+	
+	<!-- Req Task -->
+	
+	<record id="req_task_search" model="ir.ui.view">
+        <field name="name">req.task.search</field>
+        <field name="model">req.task</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+				<field string="Assignee" name="pic"/>
+				<field string="Requester" name="requester"/>
+                <field string="Request ID" name="name"/>
+				<field string="Priority" name="priority"/>
+				<field string="Requester Department" name="request_department"/>
+				<field string="PIC Department" name="pic_department"/>
+				<filter string="Active" name="active" domain="[('is_cancelled', '=', False), ('is_rejected', '=', False)]"/>
+                <separator/>
+				<filter string="Urgent" name="urgent" domain="[('priority', '=', ['3'])]"/>
+                <separator/>
+				<filter string="My Request" name="my_request" domain="[('requester', '=', uid)]"/>
+                <separator/>
+				<filter string="Assigned to Me" name="my_assignment" domain="[('pic', '=', uid)]"/>
+                <separator/>
+				<filter string="Overdue" name="overdue" domain="[('is_overdue', '=', True)]"/>
+                <separator/>
+            </search>
+        </field>
+    </record>
+	
+	<record id="req_task_view_kanban" model="ir.ui.view">
+        <field name="name">req.task.kanban</field>
+        <field name="model">req.task</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status_id" sample="1" quick_create="false" default_order="is_overdue desc, overdue_value desc, priority desc, deadline, create_date">
+                <field name="status_id" readonly="True"/>
+                <field name="color"/>
+                <field name="is_rejected"/>
+                <field name="is_cancelled"/>
+                <field name="is_urgent"/>
+                <field name="is_overdue"/>
+                <field name="closed_date"/>
+                <field name="deadline"/>
+                <field name="req_detail"/>
+                <field name="overdue_info"/>
+                <field name="pic"/>
+                <field name="type"/>
+                <templates>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                            <div class="oe_kanban_content" tooltip="kanban-tooltip">
+                                <div class="o_kanban_record_top_left">
+                                    <b class="o_kanban_record_title"><field name="name"/><span class="badge text-bg-dark float-end" invisible="not is_cancelled">Canceled</span><span class="badge text-bg-danger float-end" invisible="not is_urgent">Urgent</span><span class="badge text-bg-dark float-end" invisible="not is_rejected">Rejected</span></b>
+                                </div>
+                                <br/>
+                                <div class="o_kanban_record_body">
+                                    <span name="submit_date">Create Date : <field name="create_date"/><br/></span>
+                                    <span name="finish_date" t-if="record.closed_date.raw_value">Finish Date : <field name="finish_date"/><br/></span>
+                                    <span name="requester" invisible="type in ['personal']">Requester : <field name="requester"/><br/></span>
+                                    <span name="requester" invisible="type in ['task']">Owner : <field name="requester"/><br/></span>
+                                    <span name="priority">Priority : <field name="priority"/><br/></span>
+									<span class="badge text-bg-danger float-end" invisible="is_overdue in ['1']" t-if="record.overdue_info.raw_value"><field name="overdue_info" readonly="True"/></span>
+                                    <span name="deadline" t-if="record.deadline.raw_value">Deadline : <field name="deadline"/><br/></span>
+                                    <span name="pic" t-if="record.pic.raw_value">Assignee : <field name="pic"/><br/></span>                                    
+                                    <br/>
+                                    <span name="req_detail" t-if="record.req_detail.raw_value"><field name="req_detail"/><br/></span>
+                                </div>								
+                                <div class="o_kanban_record_bottom">                                                                        
+                                </div>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+	
+	<record id="req_task_tree" model="ir.ui.view">
+        <field name="name">req.task.tree</field>
+        <field name="model">req.task</field>
+        <field name="arch" type="xml">
+            <tree string="Task List">
+                <field name="name"/>
+                <field name="create_date"/>
+                <field name="status_id"/>
+                <field name="requester"/>
+                <field name="request_department" optional="hide"/>
+                <field name="pic"/>
+                <field name="pic_department" optional="hide"/>
+                <field name="team" optional="hide" widget="many2many_tags"/>
+                <field name="deadline"/>
+                <field name="priority"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="req_task_form" model="ir.ui.view">
+        <field name="name">req.task.form</field>
+        <field name="model">req.task</field>
+        <field name="arch" type="xml">
+            <form string="Task Details">
+                <sheet>
+				<header>
+				    <button string="Save" name="save" type="object"/>
+				    <button string="Cancel" name="cancel" type="object" invisible="status_id in [1,6,7] or type in ['personal'] or uid not in [requester] and not is_requester_upline"/>
+				    <button string="Accept Task" name="accept" type="object" invisible="current_user not in [pic] or status_id not in [2,3]"/>
+					<button string="Submit" name="submit" type="object" invisible="status_id not in [1] or uid not in [requester] and not is_requester_upline"/>
+					<button string="Approve" name="request.task_approval_list_action" type="action" invisible="not is_approver or status_id not in [2]"/>
+					<button string="Reject" name="request.task_approval_list_action" type="action" context="{'default_action': 'reject'}" invisible="type in ['personal'] or status_id not in [2,3,4] or not is_requester_upline and not is_pic_upline"/>
+					<button string="Delegate This Task" name="request.req_task_delegate_action" type="action" context="{'default_old_pic': pic, 'default_old_pic_department': pic_department}" invisible="type in ['personal'] or status_id in [1,5,6,7] or uid not in [pic] and not is_pic_upline"/>
+				    <button string="Delegate Action" name="open_delegation" type="object" invisible="not is_approver or not is_delegate_submit"/>
+				    <button string="Delegate Action" name="open_delegation" type="object" invisible="not is_pic_upline_delegation"/>
+				    <button string="Finish This Task" name="finish" type="object" invisible="status_id not in [4] or uid not in [pic] and not is_pic_upline"/>
+				    <button string="Finish This Task" name="finish" type="object" invisible="type not in ['personal']"/>
+					<button string="Finish This Task" name="finish" type="object" invisible="status_id not in [2,3] or uid not in [requester]"/>
+					<button string="Reopen This Task" name="open_reopen_form" type="object" invisible="type in ['personal'] or status_id not in [6] or uid not in [requester] and not is_requester_upline"/>
+				    <button string="Send Notification to Email" name="create_notification_task_mail" type="object" invisible="type in ['personal'] or status_id in [1,6]"/>
+					<button string="Close This Task" name="closed" type="object" invisible="status_id not in [6] or uid not in [requester] and not is_requester_upline"/>
+					<field name="status_id" widget="statusbar_duration" invisible="type in ['personal']"/>
+					<field name="status_id" widget="statusbar_duration" options="{'fold_field': 'todo'}" invisible="type not in ['personal']"/>
+                </header>
+				<field name="type" widget="radio" options="{'horizontal': true}" invisible="status_id not in [1]"/>
+				<span class="badge text-bg-dark float-end" invisible="not is_cancelled">Canceled</span><span class="badge text-bg-dark float-end" invisible="not is_rejected">Rejected</span><span class="badge text-bg-danger float-end" invisible="not is_urgent" style="font-size:30px">Urgent</span><span class="badge text-bg-warning float-end" invisible="status_id not in [5]">Need Delegate Action</span><span class="badge text-bg-danger float-mid" invisible="is_overdue in ['1']"><field name="overdue_info" readonly="True"/></span>
+                    <div class="oe_title">                        
+                        <h1>
+                            <span class="o_form_label">Request ID</span>
+                            <field name="name" readonly="True"/>
+                        </h1>
+                    </div>
+                    <group>
+						<field name="dummy_save" invisible="True"/>                       
+						<field name="latest_delegate_id" invisible="True"/>                       
+						<field name="current_user" invisible="True"/>                       
+						<field name="is_cancelled" invisible="True"/>                       
+						<field name="is_rejected" invisible="True"/>                       
+						<field name="is_overdue" invisible="True"/>                       
+						<field name="is_urgent" invisible="True"/>                       
+						<field name="is_approver" invisible="True"/>                       
+						<field name="is_requester_upline" invisible="True"/>                       
+						<field name="is_pic_upline" invisible="True"/>                       
+						<field name="is_pic_upline_delegation" invisible="True"/>                       
+						<field name="is_delegate_submit" invisible="True"/>
+						<field name="pending_approver1" invisible="True"/>
+						<field name="pending_approver2" invisible="True"/>						
+                    </group>
+					<notebook>
+                    <page name="details" string="Details">
+                        <group>
+                            <group>
+                                <field name="create_date" readonly="True" string="Create On"/>
+                                <field name="task_type" invisible="type in ['personal']" readonly="status_id not in [1]"/>
+                                <field name="pending_approver" invisible="not pending_approver" widget="many2many_tags" readonly="True" force_save="1"/>/&gt;                            
+                                <field name="requester" readonly="status_id not in [1]" options="{'no_create': True}" invisible="type in ['personal']"/>
+                                <field name="requester" readonly="True" invisible="type in ['task']" string="Owner" options="{'no_create': True}"/>
+                                <field name="request_department" string="Department" readonly="True" invisible="type in ['personal']" force_save="1"/>
+								<field name="requester_upline" widget="many2many_tags" readonly="True" invisible="type in ['personal']" force_save="1"/>
+								<field name="priority" widget="priority" readonly="uid not in [requester]" invisible="type in ['task']"/>
+								<field name="urgent_note" invisible="type in ['task'] or priority not in ['3']" required="priority in ['3']" readonly="uid not in [requester]"/>
+                                <field name="deadline" readonly="uid not in [requester]" invisible="type in ['task']"/>
+								<field name="notes" string="Todo Detail" invisible="type in ['task']"/>
+                            </group>
+                            <group>
+                                <field name="priority" widget="priority" readonly="uid not in [requester]" invisible="type in ['personal']"/>
+                                <field name="urgent_note" invisible="type in ['personal'] or priority not in ['3']" required="priority in ['3']" readonly="uid not in [requester]"/>
+                                <field name="deadline" readonly="uid not in [requester]" invisible="type in ['personal']"/>
+                                <field name="req_detail" readonly="uid not in [requester]" invisible="type in ['personal']" required="type in ['task']"/>
+                                <field name="reopen_reason" invisible="not reopen_reason" readonly="status_id not in [6]" force_save="1"/>
+								<field name="attachment_ids" widget="many2many_binary_preview"/>
+                            </group>
+                        </group>
+                        <br/>
+                        <group string="Task Workspace" invisible="type in ['personal']">
+                            <label for="pic" string="Assignee"/>
+                            <div>
+                                <field name="pic" class="oe_inline" readonly="status_id not in [1]" options="{'no_create': True}" required="type in ['task']"/>
+                                <field name="add_team" readonly="uid not in [pic]"/> Add Team
+                            </div>
+							<field name="team" invisible="not add_team" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="pic_department" string="Department" readonly="True" force_save="1"/>
+							<field name="pic_upline" widget="many2many_tags" readonly="True" force_save="1"/>
+                            <field name="notes" readonly="uid not in [pic]"/>
+                        </group>
+                        <div class="clearfix"/>
+                    </page>
+                    <page string="Delegation List" invisible="type in ['personal']">
+                        <field name="task_delegate_list_ids" readonly="True" options="{'no_open': True}">
+                            <tree>
+                                <field name="name" readonly="True" optional="hide"/>
+                                <field name="old_pic" readonly="True"/>
+                                <field name="old_pic_department" readonly="True" optional="hide"/>
+                                <field name="request_date"/>
+                                <field name="new_pic" readonly="True"/>	
+                                <field name="new_pic_department" readonly="True" optional="hide"/>	
+                                <field name="delegate_reason"/>
+                                <field name="status_id"/>
+                                <field name="closed_date"/>
+                                <field name="note"/>
+								<field name="pending_approver1" column_invisible="True"/>
+								<field name="pending_approver2" column_invisible="True"/>
+                            </tree>
+                        </field>
+                            <div class="clearfix"/>
+                    </page>
+					<page string="Time Tracking" invisible="type in ['personal']">
+                        <group>
+                                <field name="create_date" readonly="True" string="Create On"/>
+                                <field name="submit_date" readonly="True"/>
+                                <field name="approved_date" readonly="True" invisible="not approved_date"/>
+                                <field name="receive_date" readonly="True"/>
+                                <field name="finish_date" readonly="True"/>
+                                <field name="closed_date" readonly="True"/>
+                        </group>
+                    </page>
+					<page string="Approval List" invisible="type in ['personal']">
+                            <field name="approval_list_ids" readonly="True">
+                            <tree>
+                                <field name="name" readonly="True"/>
+                                <field name="action" readonly="True"/>
+                                <field name="approval_date" readonly="True"/>								
+                                <field name="note"/>
+                            </tree>
+                            </field>
+                            <div class="clearfix"/>
+                        </page>
+					</notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>                
+            </form>
+        </field>
+    </record>	
+	
+	<record id="req_task_reopen_view_form" model="ir.ui.view">
+        <field name="name">req.task.reopen.form</field>
+        <field name="model">req.task</field>
+		<field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <form string="Reopen Reason">
+                <separator string="Please Fill The Reopen Reason"/>
+                <group>
+                    <field name="reopen_reason" class="w-100" string="Reason" required="True"/>
+                </group>
+                <footer>
+                    <button string="Submit" name="reopen" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" class="oe_link" special="cancel" data-hotkey="x"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+	
+	<record id="req_task_action" model="ir.actions.act_window">
+        <field name="name">Task List</field>
+        <field name="res_model">req.task</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="req_task_view_kanban"/>
+		<field name="context">{
+            'search_default_active': 1
+        }</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create New Task Now
+          </p>
+        </field>
+    </record>
+
+	<record id="create_req_task_action" model="ir.actions.act_window">
+        <field name="name">Create Task</field>
+        <field name="res_model">req.task</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="req_task_form"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create Task
+          </p>
+        </field>
+    </record>
+	
+		<!-- Delegate -->
+		
+	<record id="req_task_delegate_view_form" model="ir.ui.view">
+        <field name="name">req.task.delegate.form</field>
+        <field name="model">task.delegate.list</field>
+		<field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <form string="Submit Delegation">
+                <sheet>
+				<header>
+				    <field name="status_id" widget="statusbar_duration"/>
+                </header>
+                    <div class="oe_title">                        
+                        <h1>
+                            <span class="o_form_label">Delegate ID</span>
+                            <field name="name" readonly="True"/>
+                        </h1>
+                    </div>
+						<field name="dummy_save" invisible="True"/>                       
+						<field name="task_request_id" invisible="True"/>
+                        <group>
+                            <group>
+                                <field name="request_date" readonly="True"/>                                                           
+                                <field name="old_pic" readonly="True"/>                            
+                                <field name="old_pic_department" string="Department" readonly="True"/>
+                            </group>
+                            <group>
+                                <field name="new_pic" options="{'no_create': True}"/>
+                                <field name="new_pic_department" string="Department" readonly="True" force_save="1"/>
+                                <field name="new_pic_upline" string="Upline" readonly="True" force_save="1" widget="many2many_tags"/>
+                                <field name="delegate_reason" required="True" readonly="status_id not in [1]"/>
+								<field name="pending_approver1" invisible="True"/>
+								<field name="pending_approver2" invisible="True"/>
+                            </group>
+                        </group>
+                <footer>
+                    <button string="Submit" name="create_delegate" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel"/>
+                </footer>
+				</sheet>
+           </form>
+        </field>
+    </record>
+	
+	<record id="delegate_task_action_view_form" model="ir.ui.view">
+        <field name="name">delegate.task.action.form</field>
+        <field name="model">task.delegate.list</field>
+		<field name="priority" eval="50"/>
+        <field name="arch" type="xml">
+            <form string="Submit Delegation">
+                <sheet>
+				<header>
+				    <field name="status_id" widget="statusbar_duration"/>
+                </header>
+                    <div class="oe_title">                        
+                        <h1>
+                            <span class="o_form_label">Delegate ID</span>
+                            <field name="name" readonly="True"/>
+                        </h1>
+                    </div>
+						<field name="dummy_save" invisible="True"/>                       
+						<field name="task_request_id" invisible="True"/>
+                        <group>
+                            <group>
+                                <field name="request_date" readonly="True"/>                                                           
+                                <field name="old_pic" readonly="True" string="Existing Assignee"/>                            
+                                <field name="old_pic_department" string="Department" readonly="True"/>
+                            </group>
+                            <group>
+                                <field name="new_pic"/>
+                                <field name="new_pic_department" string="Department" readonly="True" force_save="1"/>
+                                <field name="new_pic_upline" string="Upline" widget="many2many_tags" readonly="True" force_save="1"/>
+                                <field name="delegate_reason" required="True"/>
+								<field name="pending_approver1" invisible="True"/>
+								<field name="pending_approver2" invisible="True"/>
+                            </group>
+                        </group>
+                <footer>
+                    <button string="Approve" name="approve" type="object" class="oe_highlight" invisible="status_id not in [1]"/>
+                    <button string="Approve" name="accept_delegation" type="object" class="oe_highlight" invisible="status_id not in [2]"/>
+                    <button string="Reject" name="open_reject" type="object" invisible="status_id not in [1,2]"/>
+                </footer>
+				</sheet>
+           </form>
+        </field>
+    </record>
+	
+	<record id="task_delegate_reject_view_form" model="ir.ui.view">
+        <field name="name">task.delegate.reject.form</field>
+        <field name="model">task.delegate.list</field>
+		<field name="priority" eval="200"/>
+        <field name="arch" type="xml">
+            <form string="Approve">
+                <separator string="Please Fill The Reject Reason"/>
+                <group>
+                    <field name="note" class="w-100" string="Reason" required="True"/>
+                </group>
+                <footer>
+                    <button string="Submit" name="reject" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" class="oe_link" special="cancel" data-hotkey="x"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+	
+	<record id="req_task_delegate_action" model="ir.actions.act_window">
+        <field name="name">Req Task Delegation</field>
+        <field name="res_model">task.delegate.list</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="req_task_delegate_view_form"/>
+		<field name="context">{
+            'default_task_request_id': active_id
+        }</field>		
+        <field name="target">new</field>
+    </record>
+	
+			<!-- Approval -->
+		
+	<record id="task_approval_list_view_form" model="ir.ui.view">
+        <field name="name">task.approval.list.form</field>
+        <field name="model">task.approval.list</field>
+		<field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <form string="Approve">
+                <separator string="Fill The Note If Necessary"/>
+                <group>
+                    <field name="task_request_id" invisible="True"/>
+                    <field name="name" invisible="True"/>
+                    <field name="approval_date" invisible="True"/>
+                    <field name="action" required="True"/>
+                    <field name="note" class="w-100" required="True"/>
+                </group>
+                <footer>
+                    <button string="Submit" name="action_submit" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" class="oe_link" special="cancel" data-hotkey="x"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+	
+	<record id="task_approval_list_action" model="ir.actions.act_window">
+        <field name="name">Task Approval List</field>
+        <field name="res_model">task.approval.list</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="task_approval_list_view_form"/>
+		<field name="context">{
+            'default_task_request_id': active_id
+        }</field>
+        <field name="target">new</field>
+    </record>
+	
+	<record id="task_approval_list1_action" model="ir.actions.act_window">
+        <field name="name">Task Approval List</field>
+        <field name="res_model">task.approval.list</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="task_approval_list_view_form"/>
+		<field name="context">{
+            'default_task_request_id': active_id
+        }</field>
+        <field name="target">new</field>
+    </record>
+	
+	<!-- Menu Inherit -->
+			
+	<menuitem
+        id="menu_req_status_configuration"
+        name="Request Status Configuration"
+        parent="maintenance.menu_maintenance_configuration"
+        action="req_task_status_action"
+        groups="base.group_system"
+        sequence="13"/>
+</odoo>

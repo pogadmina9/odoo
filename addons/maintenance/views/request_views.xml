@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- general affair : views -->
+
+    <record id="ga_request_view_search" model="ir.ui.view">
+        <field name="name">ga.request.search</field>
+        <field name="model">general.affair.request</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field string="Name" name="name"/>
+				<filter string="Created by Me" name="created_by_me" domain="[('create_user', '=', uid)]"/>
+                <separator/>
+                <filter string="My Request" name="my_maintenances" domain="[('requester', '=', uid)]"/>
+                <separator/>
+                <filter string="Assigned to Me" name="my_assignment" domain="[('assignee', '=', uid)]"/>
+                <separator/>
+				<filter string="Active" name="active" domain="[('archive', '=', 0)]"/>
+                <separator/>
+            </search>
+        </field>
+    </record>
+	
+	<record id="ga_request_view_form" model="ir.ui.view">
+        <field name="name">ga.request.form</field>
+        <field name="model">general.affair.request</field>
+        <field name="arch" type="xml">
+            <form string="Request">
+                <header>/&gt;
+                    <button string="Save" name="dummy_save" type="object"/>
+                    <field name="stage_ga_id" widget="statusbar_duration" options="{'clickable': True}"/>/>
+                </header>
+                <sheet>
+                    <div invisible="not archive">
+                        <span class="badge text-bg-dark float-mid">Canceled</span>
+                    </div>
+					<div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" readonly="True"/>
+                        </h1>
+                    </div>
+                    <group>
+						<field name="done" invisible="1"/>
+                        <field name="archive" invisible="1"/>
+                        <group>
+							<field name="archive" invisible="1"/>
+							<field name="check_group_ga" invisible="1"/>						
+							<field name="create_user" invisible="1"/>						
+							<field name="request_date" readonly="True"/>						
+                            <field name="finish_date" readonly="True" invisible="not finish_date"/>                            
+                            <field name="maintenance_team_id" string="Request for" options="{'no_create': True, 'no_open': True}" readonly="True"/>
+                            <field name="stage_ga_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="requester" string="Requester" options="{'no_create': True}" required="True"/>
+                            <field name="request" required="True" placeholder="Example: Marketing Tools (Kalender)"/>
+                            <field name="req_detail" required="True" placeholder="Example: Kalender POG 20 Pcs
+                            
+                            
+                            
+                            
+                            
+                            
+                            Kebutuhan untuk tanggal 5 Februari 2024"/>
+                        </group>
+                       <group>
+                            <field name="assignee" widget="many2many_tags" options="{'no_create': True}"/>                           
+                            <field name="action_plan"/>                            
+                       </group>
+                    </group>                    
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+	
+	<record id="ga_request_view_kanban" model="ir.ui.view">
+        <field name="name">ga.request.kanban</field>
+        <field name="model">general.affair.request</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_ga_id" sample="1" quick_create="false">
+                <field name="stage_ga_id" readonly="True"/>
+                <field name="color"/>
+                <field name="archive"/>
+                <field name="request_date"/>
+                <field name="requester"/>
+                <field name="request"/>
+                <field name="req_detail"/>
+                <templates>
+                    <t t-name="kanban-tooltip">
+                       <ul class="oe_kanban_tooltip">
+                          <li t-if="record.req_detail.raw_value"><t t-esc="record.req_detail.value"/></li>
+                       </ul>
+                    </t>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                            <div class="oe_kanban_content" tooltip="kanban-tooltip">
+                                <div class="o_kanban_record_top">
+                                    <b class="o_kanban_record_title"><field name="name"/></b>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <span name="request_date" t-if="record.request_date.raw_value">Created Date : <field name="request_date"/><br/></span>
+                                    <span name="requester" t-if="record.requester.raw_value">Requested by : <field name="requester"/><br/></span>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <div class="o_kanban_inline_block ml4 mr4">
+                                        <span name="request" t-if="record.request.raw_value"><field name="request"/><br/></span>
+                                        </div>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right"> 
+                                        <field name="assignee" widget="many2many_avatar_user" readonly="True"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="general_affair_request_view_tree" model="ir.ui.view">
+        <field name="name">ga.request.tree</field>
+        <field name="model">general.affair.request</field>
+        <field name="arch" type="xml">
+            <tree string="General Affair Request">
+                <field name="name"/>
+                <field name="stage_ga_id"/>
+                <field name="request_date"/>
+                <field name="requester"/>
+                <field name="request"/>
+                <field name="assignee" widget="many2many_avatar_user"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="ga_request_view_graph" model="ir.ui.view">
+        <field name="name">ga.request.graph</field>
+        <field name="model">general.affair.request</field>
+        <field name="arch" type="xml">
+            <graph string="General Affair Request" sample="1">
+                <field name="stage_ga_id"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="ga_request_view_pivot" model="ir.ui.view">
+        <field name="name">ga.request.pivot</field>
+        <field name="model">general.affair.request</field>
+        <field name="arch" type="xml">
+            <pivot string="General Affair Request" sample="1">
+                <field name="requester"/>
+                <field name="stage_ga_id"/>
+            </pivot>
+        </field>
+    </record>
+	
+	<record id="ga_request_action" model="ir.actions.act_window">
+        <field name="name">GA Request</field>
+        <field name="res_model">general.affair.request</field>
+        <field name="view_mode">kanban,tree,form,pivot,graph</field>
+        <field name="view_id" ref="ga_request_view_kanban"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            GA Request
+          </p>
+        </field>
+    </record>
+	
+	<record id="ga_request_create_action" model="ir.actions.act_window">
+        <field name="name">GA Request</field>
+        <field name="res_model">general.affair.request</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ga_request_view_form"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            GA Request
+          </p>
+        </field>
+    </record>
+	
+	   <!-- pengajuan jasa : views -->
+	   
+	<record id="pj_request_view_search" model="ir.ui.view">
+        <field name="name">pj.request.search</field>
+        <field name="model">pengajuan.jasa</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field string="ID Request" name="name"/>
+                <field string="Sales" name="sales"/>
+                <field string="Instansi" name="partner"/>
+                <field string="Activity" name="activity_type"/>
+                <field string="Man Power" name="man_power"/>
+                <field string="Presales" name="presales"/>
+                <field string="PIC Teknisi" name="pic_teknisi"/>
+				<filter string="Created by Me" name="created_by_me" domain="[('create_user', '=', uid)]"/>
+                <separator/>
+                <filter string="My Request" name="my_maintenances" domain="[('requester', '=', uid)]"/>
+                <separator/>
+                <filter string="Need My Approval" name="my_approval" domain="[('approver.user_ids', 'ilike', uid)]"/>
+                <separator/>
+                <filter string="Assigned to Me" name="my_assignment" domain="['|', ('presales.name', '=', uid), ('teknisi', '=', uid)]"/>
+				<filter string="Need PIC Report" name="need_pic_report" domain="[('pic_report', '=', False), ('activity_type', 'in', [12,16])]"/>
+                <separator/>
+				<filter string="Active" name="active" domain="[('archive', '=', 0)]"/>
+                <separator/>
+				<filter string="My Project" name="my_project" domain="[('sales', '=', uid)]"/>
+                <separator/>				
+                <filter string="Need Presales" name="created_by_me" domain="[('man_power', 'in', ['presales', 'both'])]"/>
+                <filter string="Need Technical" name="created_by_me" domain="[('man_power', 'in', ['teknisi', 'both'])]"/>
+                <separator/>
+            </search>
+        </field>
+    </record>
+
+	<record id="pj_request_view_kanban" model="ir.ui.view">
+        <field name="name">pj.request.kanban</field>
+        <field name="model">pengajuan.jasa</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_pj_id" sample="1" quick_create="false" default_order="is_urgent desc, is_possible_urgent desc, request_date">
+                <field name="stage_pj_id" readonly="True"/>
+                <field name="color"/>
+                <field name="archive"/>
+                <field name="request_date"/>
+                <field name="requester"/>
+                <field name="activity_type"/>
+                <field name="schedule_date"/>
+                <field name="teknisi"/>
+                <templates>
+                    <t t-name="kanban-tooltip">
+                       <ul class="oe_kanban_tooltip">
+                          <li t-if="record.job_description.raw_value"><t t-esc="record.job_description.value"/></li>
+                       </ul>
+                    </t>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                            <div class="oe_kanban_content" tooltip="kanban-tooltip">
+                                <div class="o_kanban_record_top">
+                                    <b class="o_kanban_record_title"><field name="name"/></b>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <span name="request_date" t-if="record.request_date.raw_value">Created Date : <field name="request_date"/><br/></span>
+                                    <span name="sales" t-if="record.sales.raw_value">Sales : <field name="sales"/><br/></span>
+                                    <span name="activity_type" t-if="record.activity_type.raw_value"><field name="activity_type"/> | <field name="partner"/><br/></span>
+                                    <span name="man_power" t-if="record.man_power.raw_value">Man Power : <field name="man_power"/><br/></span>
+                                    <span name="schedule_date" t-if="record.schedule_date.raw_value">Schedule : <field name="schedule_date"/><br/></span>
+                                </div>
+								<field name="job_description"/>
+                                <div class="o_kanban_record_bottom">                                    
+                                    <div class="oe_kanban_bottom_right">
+										<div invisible="not archive">
+												<span class="badge text-bg-dark float-end">Canceled</span>
+											</div>
+                                        <field name="teknisi" widget="many2many_avatar_user" readonly="True"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+		   
+	<record id="pj_request_view_form" model="ir.ui.view">
+        <field name="name">pj.request.form</field>
+        <field name="model">pengajuan.jasa</field>
+        <field name="arch" type="xml">
+            <form string="Request">
+                <header>/&gt;
+                    <button string="Save" name="dummy_save" type="object"/>
+                    <button string="Save and Submit" name="do_submit" type="object" invisible="stage_pj_id not in [1]"/>
+                    <button string="Approve" name="do_approve" type="object" invisible="stage_pj_id not in [3] or not check_approver_button"/>
+                    <button string="Cancel" name="submit_cancel_reason" type="object" invisible="stage_pj_id not in [1,3] and not check_group_pj"/>
+                    <button string="Reject" name="submit_reject_reason" type="object" invisible="stage_pj_id not in [3,4] or check_approver_button not in [True] and not check_group_pj"/>
+                    <button string="Urgent" name="submit_urgent_reason" type="object" invisible="stage_pj_id not in [1] or is_possible_urgent or is_urgent"/>
+                    <button string="Urgent Action" name="urgent_action" type="object" invisible="not is_possible_urgent or not check_group_approver"/>
+                    <button string="Submit Report" name="do_submit_report" type="object" invisible="current_user != presales.name"/>
+                    <field name="stage_pj_id" widget="statusbar_duration"/>/&gt;
+                </header>
+                <sheet>
+                    <div invisible="not archive">
+                        <span class="badge text-bg-dark float-mid">Canceled</span>
+                    </div>
+					<div invisible="not is_possible_urgent">
+                        <span class="badge text-bg-warning float-end">Possible Urgent</span>
+                    </div>
+					<div invisible="not is_urgent">
+                        <span class="badge text-bg-danger float-end">Urgent</span>
+                    </div>
+					<div invisible="not is_rejected">
+                        <span class="badge text-bg-danger float-end">Rejected</span>
+                    </div>
+					<field name="user_type" widget="radio" options="{'horizontal': true}" invisible="stage_pj_id not in [1]"/>
+					<div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" readonly="True"/>
+                        </h1>
+                    </div>
+                    <group>
+						<field name="pj_id" invisible="1"/>
+						<field name="done" invisible="1"/>
+                        <field name="archive" invisible="1"/>
+						<field name="check_group_pj" invisible="1"/>
+						<field name="check_group_approver" invisible="1"/>
+                        <field name="is_rejected" invisible="1"/>
+                        <field name="is_urgent" invisible="1"/>
+                        <field name="is_possible_urgent" invisible="1"/>
+                        <field name="save" invisible="1"/>
+                        <field name="compute_field" invisible="1"/>
+                        <field name="readonly" invisible="1"/>
+                        <field name="current_user" invisible="1"/>
+                        <field name="check_approver_button" invisible="1"/>
+                        <group>													
+							<field name="create_user" invisible="1"/>						
+							<field name="request_date" readonly="True"/>						
+							<field name="approved_date" readonly="True" invisible="not approved_date"/>						
+                            <field name="finish_date" readonly="True" invisible="not finish_date"/>                            
+                            <field name="maintenance_team_id" string="Request for" options="{'no_create': True, 'no_open': True}" readonly="True"/>
+                            <field name="stage_pj_id" options="{'no_create': True, 'no_open': True}" readonly="not check_group_pj"/>
+							<field name="urgent_reason" readonly="True" invisible="not is_possible_urgent and not is_urgent"/>
+							<field name="urgent_reject_reason" readonly="True" invisible="not urgent_reject_reason"/>
+							<field name="cancel_reason" readonly="True" invisible="not cancel_reason"/>
+							<field name="reject_reason" readonly="True" invisible="not is_rejected"/>
+                            <field name="requester" string="Requester" options="{'no_create': True, 'no_open': True}" required="True" readonly="readonly in [True]"/>
+                            <field name="activity_type" required="True" options="{'no_create': True, 'no_open': True}" readonly="stage_pj_id not in [1]"/>                            
+                            <field name="pic_report" options="{'no_create': True, 'no_open': True}" invisible="activity_type not in [12, 16]" readonly="not check_group_pj"/>                            
+                            <field name="man_power" required="True" readonly="readonly in [True]"/>                            
+                            <field name="approver" widget="many2many_tags" options="{'no_create': True, 'no_open': True}" readonly="readonly in [True]" required="stage_pj_id in [1]"/>                            
+                            <field name="sales" required="True" widget="many2one_tags" options="{'no_create': True, 'no_open': True}" readonly="readonly in [True]"/>                            
+                            <field name="bendera" required="True" options="{'no_create': True, 'no_open': True}" readonly="readonly in [True]"/>                            
+                            <field name="no_ppc" required="True" readonly="readonly in [True]" invisible="stage_pj_id not in [1] and crm_id"/>                            
+                            <field name="crm_id" options="{'no_create': True}" readonly="readonly in [True]" invisible="stage_pj_id in [1] or not crm_id"/>                        
+                        </group>
+                       <group>
+							<field name="new_instansi" placeholder="Contoh: PT ABC" invisible="user_type not in ['new_user'] or stage_pj_id not in [1]"/>
+                            <span class="o_form_label o_td_label" name="address_name">
+                            <b invisible="user_type not in ['new_user'] or stage_pj_id not in [1]">Address</b>
+                            </span>
+                            <div class="o_address_format">
+                                <field name="new_street" class="o_address_street" invisible="user_type not in ['new_user'] or stage_pj_id not in [1]"/>
+                                <field name="new_city" placeholder="Contoh: Surabaya" class="o_address_city" invisible="user_type not in ['new_user'] or stage_pj_id not in [1]"/>
+                                <field name="new_state" placeholder="Contoh: Jawa Timur" class="o_address_state" invisible="user_type not in ['new_user'] or stage_pj_id not in [1]"/>
+                                <field name="new_zip" placeholder="Contoh: 60173" class="o_address_zip" invisible="user_type not in ['new_user'] or stage_pj_id not in [1]"/>
+                                <div name="partner_address_country" class="d-flex justify-content-between">
+                                    <field name="new_country" placeholder="Contoh: Indonesia" class="o_address_country" invisible="user_type not in ['new_user'] or stage_pj_id not in [1]"/>
+                                </div>
+                            </div>
+                            <field name="new_cp" invisible="user_type not in ['new_user'] or stage_pj_id not in [1]"/>
+                            <field name="new_phone" invisible="user_type not in ['new_user'] or stage_pj_id not in [1]"/>
+                            <field name="new_job_position" invisible="user_type not in ['new_user'] or stage_pj_id not in [1]"/>
+                            <field name="partner" options="{'no_create': True, 'no_open': True}" readonly="readonly in [True]" invisible="user_type in ['new_user'] and stage_pj_id in [1]"/>                            
+                            <field name="contact" options="{'no_create': True, 'no_open': True}" required="True" readonly="readonly in [True]" invisible="user_type in ['new_user'] and stage_pj_id in [1]"/>                            
+                            <field name="address" required="True" readonly="readonly in [True]" invisible="user_type in ['new_user'] and stage_pj_id in [1]"/>                            
+                            <field name="phone" required="True" readonly="readonly in [True]" invisible="user_type in ['new_user'] and stage_pj_id in [1]"/>                            
+                            <field name="presales" options="{'no_create': True, 'no_open': True}" invisible="man_power not in ['presales', 'both']" readonly="not check_group_pj"/>                            
+                            <field name="pic_teknisi" options="{'no_create': True, 'no_open': True}" invisible="man_power not in ['teknisi', 'both']" readonly="not check_group_pj"/>                            
+                            <field name="teknisi" options="{'no_create': True, 'no_open': True}" widget="many2many_tags" invisible="man_power not in ['teknisi', 'both']" readonly="not check_group_pj"/>                            
+                            <field name="schedule_date" required="True" readonly="readonly in [True]" placeholder="Jadwal Tiba di Lokasi"/>                           
+                            <field name="job_description" required="True" readonly="readonly in [True]"/>
+                       </group>
+					   <group string="Report Checking" invisible="stage_pj_id not in [10]">
+                            <field name="upline_check" readonly="not check_group_pj"/>
+							<field name="sales_check" readonly="sales not in [current_user]"/>
+					   </group>
+                    </group>
+					<notebook>
+						<page string="Approval List">
+                            <field name="approval_list_ids" readonly="not check_group_approver">
+                            <tree editable="bottom">
+                                <field name="name" readonly="True"/>
+                                <field name="approved_date" readonly="True"/>								
+                                <field name="note"/>
+                            </tree>
+                            </field>
+                            <div class="clearfix"/>
+                        </page>
+					</notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+	
+	<record id="pj_request_view_tree" model="ir.ui.view">
+        <field name="name">pj.request.tree</field>
+        <field name="model">pengajuan.jasa</field>
+        <field name="arch" type="xml">
+            <tree string="Pengajuan Jasa">
+                <field name="name"/>
+                <field name="stage_pj_id"/>
+                <field name="request_date"/>
+                <field name="activity_type"/>
+                <field name="requester"/>
+                <field name="partner"/>
+                <field name="schedule_date"/>
+                <field name="job_description"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="pj_request_view_graph" model="ir.ui.view">
+        <field name="name">pj.request.graph</field>
+        <field name="model">pengajuan.jasa</field>
+        <field name="arch" type="xml">
+            <graph string="Pengajuan Jasa" sample="1">
+                <field name="stage_pj_id"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="pj_request_view_pivot" model="ir.ui.view">
+        <field name="name">pj.request.pivot</field>
+        <field name="model">pengajuan.jasa</field>
+        <field name="arch" type="xml">
+            <pivot string="Pengajuan Jasa" sample="1">
+                <field name="requester"/>
+                <field name="stage_pj_id"/>
+            </pivot>
+        </field>
+    </record>
+	
+	<record id="pj_request_action" model="ir.actions.act_window">
+        <field name="name">Pengajuan Jasa</field>
+        <field name="res_model">pengajuan.jasa</field>
+        <field name="view_mode">kanban,tree,form,pivot,graph</field>
+        <field name="view_id" ref="pj_request_view_kanban"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Tidak ada request
+          </p>
+        </field>
+    </record>
+	
+	<record id="pj_request_create_action" model="ir.actions.act_window">
+        <field name="name">Pengajuan Jasa</field>
+        <field name="res_model">pengajuan.jasa</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="pj_request_view_form"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            PJ Request
+          </p>
+        </field>
+    </record>
+	
+</odoo>

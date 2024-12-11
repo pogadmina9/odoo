@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_purchase_controller" model="res.groups">
+        <field name="name">Purchase Controller</field>
+		<field name="category_id" ref="base.module_category_productivity_request"/>
+        <field name="comment">The user will be able to manage PO Checking.</field>
+    </record>
+
+    <record id="group_purchasing" model="res.groups">
+        <field name="name">Purchasing</field>
+		<field name="category_id" ref="base.module_category_productivity_request"/>
+        <field name="comment">The user will be able to create PO Checking request.</field>
+    </record>	
+
+    <!-- Rules -->
+    <data noupdate="1">
+    </data>
+
+</odoo>

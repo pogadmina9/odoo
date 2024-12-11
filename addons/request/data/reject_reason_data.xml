@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record model="purchase.reject.reason" id="purchase_reject_reason1">
+        <field name="name">Revisi Harga</field>
+        <field name="sequence">1</field>
+    </record>
+    <record model="purchase.reject.reason" id="purchase_reject_reason2">
+        <field name="name">Pindah Vendor</field>
+        <field name="sequence">2</field>
+    </record>
+    <record model="purchase.reject.reason" id="purchase_reject_reason3">
+        <field name="name">Revisi Kode Barang</field>
+        <field name="sequence">3</field>
+    </record>
+	<record model="purchase.reject.reason" id="purchase_reject_reason4">
+        <field name="name">Revisi Qty</field>
+        <field name="sequence">4</field>
+    </record>	
+	<record model="purchase.reject.reason" id="purchase_reject_reason5">
+        <field name="name">PO Tidak Lengkap</field>
+        <field name="sequence">5</field>
+    </record>
+</odoo>

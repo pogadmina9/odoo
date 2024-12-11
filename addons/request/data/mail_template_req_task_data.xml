@@ -1,0 +1,815 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+	<!-- Email template for new Task & Need Approval -->
+        <record id="cancel_req_task" model="mail.template">
+            <field name="name">Task Cancelled</field>
+            <field name="model_id" ref="request.model_req_task"/>
+            <field name="subject">{{ ('(Urgent-Need Approval) ' if object.is_urgent else '(Need Approval)') }} Task Cancelled: {{ (object.name) }} by {{ (object.write_uid.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.requester.email_formatted) }} {{ (object.pic.email_formatted) }}</field>
+            <field name="email_cc">{{ (object.pic.email_formatted) }} {{ (object.requester_upline_mail if object.requester.employee_id.department_id.gm_id.id != object.pic.employee_id.department_id.gm_id.id else '') }}</field>
+            <field name="description">Sent approval notification for new task</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Tugas <t t-out="object.name or ''">ID</t> telah dibatalkan oleh <t t-out="object.write_uid.name or ''">Canceller</t> dengan informasi sebagai berikut :<br />
+						 <br />
+						Nama PIC : <t t-out="object.pic.name or ''">NamaPIC</t><br />
+						Deadline : <t t-out="format_datetime(dt=object.deadline, tz=object.pic.tz) or ''">Deadline</t><br />
+						<t t-if="object.urgent_note">Urgent Note : <t t-out="object.urgent_note or ''">Urgent Note</t><br /></t>
+						Detail Tugas : <t t-out="object.req_detail or ''">DetailTugas</t><br />
+						 <br />						 							
+						Silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+	
+        <!-- Email template for new Task & Need Approval -->
+        <record id="new_req_approval_task" model="mail.template">
+            <field name="name">(Need Approval) New Task Raised</field>
+            <field name="model_id" ref="request.model_req_task"/>
+            <field name="subject">{{ ('(Urgent-Need Approval) ' if object.is_urgent else '(Need Approval)') }} New Task Raised: {{ (object.name) }} from {{ (object.requester.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object._list_email_pending_approver()) }}</field>
+            <field name="email_cc">{{ (object.requester.email_formatted) }}, {{ (object.pic.email_formatted) }}, {{ (object._list_email_assignee_upline() if not object.pending_approver else '') }} {{ (object._list_email_requester_upline() if object.requester.employee_id.department_id.gm_id.id != object.pic.employee_id.department_id.gm_id.id else '') }} {{ (_list_email_requester_upline() if object.status_id in [5] else '') }}</field>
+            <field name="description">Sent approval notification for new task</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-if="not object.pending_approver1"> Leaders</t><t t-if="object.pending_approver1"><t t-out="object.pending_approver1 or ''">Approver1</t></t><t t-if="object.pending_approver2"> &amp; <t t-out="object.pending_approver2 or ''">Approver1</t></t>,<br /><br />
+                        Terdapat tugas baru untuk tim Anda dari <t t-out="object.requester.name or ''">Requester</t> dengan informasi sebagai berikut :<br />
+						 <br />
+						Nama PIC : <t t-out="object.pic.name or ''">NamaPIC</t><br />
+						Deadline : <t t-out="format_datetime(dt=object.deadline, tz=object.pic.tz) or ''">Deadline</t><br />
+						<t t-if="object.urgent_note">Urgent Note : <t t-out="object.urgent_note or ''">Urgent Note</t><br /></t>
+						Detail Tugas : <t t-out="object.req_detail or ''">DetailTugas</t><br />
+						 <br />						 
+						Segera review dan approve / reject untuk melanjutkan.  <br />	
+						Silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		<!-- Email template for new Task -->
+        <record id="new_req_task" model="mail.template">
+            <field name="name">New Task Raised</field>
+            <field name="model_id" ref="request.model_req_task"/>
+            <field name="subject">{{ ('(Urgent) ' if object.is_urgent else '') }} New Task Raised: {{ (object.name) }} from {{ (object.requester.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.pic.email_formatted) }}</field>
+            <field name="email_cc">{{ (object.requester.email_formatted) }} {{ (object.pic_upline_mail if not object.pending_approver else '') }} {{ (object.requester_upline_mail if object.requester.employee_id.parent_id.id != object.pic.employee_id.parent_id.id else '') }}</field>
+            <field name="description">Sent notification for new task</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.pic.name or ''">NamaPIC</t>,<br />
+						<br />
+                        Terdapat tugas baru untuk Anda dari <t t-out="object.requester.name or ''">Requester</t> dengan informasi sebagai berikut :<br />
+						 <br />
+						Nama PIC : <t t-out="object.pic.name or ''">NamaPIC</t><br />
+						Deadline : <t t-out="format_datetime(dt=object.deadline, tz=object.pic.tz) or ''">Deadline</t><br />
+						<t t-if="object.urgent_note">Urgent Note : <t t-out="object.urgent_note or ''">Urgent Note</t><br /></t>
+						Detail Tugas : <t t-out="object.req_detail or ''">DetailTugas</t><br />
+						 <br />						 
+						Segera terima tugas untuk melanjutkan.  <br />	
+						Silahkan akses link berikut :<br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+
+		<!-- Email template for approval delegation Task to old assignee upline-->
+        <record id="req_task_delegation" model="mail.template">
+            <field name="name">Task Delegation Requested</field>
+            <field name="model_id" ref="request.model_req_task"/>
+            <field name="subject">{{ ('(Urgent) ' if object.is_urgent else '') }} Task Delegation Requested: {{ (object.name) }} delegasi ke {{ (object.latest_delegate_id.new_pic.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.pic_upline_mail if not object.is_delegate_submit else '') }} {{ (object.pending_approver_mail if object.is_delegate_submit else '') }}</field>
+            <field name="email_cc">{{ (object.requester.email_formatted) }} {{ (object.pic.email_formatted) }} {{ (object.requester_upline_mail if object.requester.employee_id.parent_id.id != object.pic.employee_id.parent_id.id else '') }} {{ (object.pic_upline_mail if object.is_delegate_submit else '') }}</field>
+            <field name="description">Sent notification for requesting delegation</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-if="not object.pending_approver1"> Leaders</t><t t-if="object.pending_approver1"><t t-out="object.pending_approver1 or ''">Approver1</t></t><t t-if="object.pending_approver2"> &amp; <t t-out="object.pending_approver2 or ''">Approver1</t></t>,<br /><br />
+                        <t t-out="object.pic.name or ''">OldPIC</t> telah mengajukan delegasi tugas kepada assignee baru yaitu <t t-out="object.latest_delegate_id.new_pic.name or ''">NewAssignee</t> dengan informasi sebagai berikut :<br />
+						<br />
+						Nama Requester : <t t-out="object.requester.name or ''">NamaRequester</t><br />
+						Deadline : <t t-out="format_datetime(dt=object.deadline, tz=object.pic.tz) or ''">Deadline</t><br />
+						<t t-if="object.urgent_note">Urgent Note : <t t-out="object.urgent_note or ''">Urgent Note</t><br /></t>
+						Detail Tugas : <t t-out="object.req_detail or ''">DetailTugas</t><br />
+						Alasan Delegasi : <t t-out="object.latest_delegate_id.delegate_reason or ''">DetailTugas</t><br />
+						 <br />						 
+						Segera review dan approve / reject untuk melanjutkan.  <br />	
+						Silahkan akses link berikut :<br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+
+		<!-- Email template for rejected Task -->
+        <record id="rejected_req_task" model="mail.template">
+            <field name="name">Task is Rejected</field>
+            <field name="model_id" ref="request.model_req_task"/>
+            <field name="subject">{{ ('(Urgent) ' if object.is_urgent else '') }} Task Rejected: {{ (object.name) }} rejected by {{ (object.latest_approval_id.name.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.requester.email_formatted) }}</field>
+            <field name="email_cc">{{ (object.pic.email_formatted) }} {{ (object.pic_upline_mail if not object.pending_approver else '') }} {{ (object.requester_upline_mail if object.requester.employee_id.parent_id.id != object.pic.employee_id.parent_id.id else '') }}</field>
+            <field name="description">Sent notification for rejected task</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.requester.name or ''">NamaRequester</t>,<br /><br />
+                        Tugas yang Anda berikan kepada <t t-out="object.pic.name or ''">PIC</t>, telah ditolak oleh <t t-out="object.latest_approval_id.name.name or ''">NamaRejector</t> dengan informasi sebagai berikut :<br />
+						 <br />
+						Nama Requester : <t t-out="object.requester.name or ''">NamaRequester</t><br />
+						Deadline : <t t-out="format_datetime(dt=object.deadline, tz=object.pic.tz) or ''">Deadline</t><br />
+						<t t-if="object.urgent_note">Urgent Note : <t t-out="object.urgent_note or ''">Urgent Note</t><br /></t>
+						Detail Tugas : <t t-out="object.req_detail or ''">DetailTugas</t><br />
+						Reject Reason : <t t-out="object.latest_approval_id.note or ''">RejectReason</t><br />
+						<br />						 						
+						Silahkan akses link berikut :<br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		<!-- Email template for rejected delegation Task -->
+        <record id="rejected_req_task_delegation" model="mail.template">
+            <field name="name">Task Delegation is Rejected</field>
+            <field name="model_id" ref="request.model_req_task"/>
+            <field name="subject">{{ ('(Urgent) ' if object.is_urgent else '') }} Task Delegation Rejected: {{ (object.name) }} rejected by {{ (object.latest_delegate_id.write_uid.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.pic.email_formatted) }}</field>
+            <field name="email_cc">{{ (object.requester.email_formatted) }} {{ (object.latest_delegate_id.write_uid.email_formatted) }} {{ (object.pic_upline_mail) }} {{ (object.requester_upline_mail if object.requester.employee_id.parent_id.id != object.pic.employee_id.parent_id.id else '') }}</field>
+            <field name="description">Sent notification for rejected delegation task</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.pic.name or ''">Assignee</t>,<br /><br />
+                        Pengajuan delegasi tugas telah ditolak oleh <t t-out="object.latest_delegate_id.write_uid.name or ''">NamaRejector</t> dengan informasi sebagai berikut :<br />
+						 <br />
+						Nama Requester : <t t-out="object.requester.name or ''">NamaRequester</t><br />
+						Deadline : <t t-out="format_datetime(dt=object.deadline, tz=object.pic.tz) or ''">Deadline</t><br />
+						<t t-if="object.urgent_note">Urgent Note : <t t-out="object.urgent_note or ''">Urgent Note</t><br /></t>
+						Detail Tugas : <t t-out="object.req_detail or ''">DetailTugas</t><br />
+						Reject Reason : <t t-out="object.latest_delegate_id.note or ''">Alasan</t><br />	
+						<br />						 
+						Silahkan akses link berikut :<br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		<!-- Email template for reopened Task -->
+        <record id="reopened_req_task" model="mail.template">
+            <field name="name">Task is Reopened</field>
+            <field name="model_id" ref="request.model_req_task"/>
+            <field name="subject">{{ ('(Urgent) ' if object.is_urgent else '') }} Task Reopened: {{ (object.name) }} -- Please Recheck</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.pic.email_formatted) }}</field>
+            <field name="email_cc">{{ (object.requester.email_formatted) }} {{ (object.pic_upline_mail if not object.pending_approver else '') }} {{ (object.requester_upline_mail if object.requester.employee_id.parent_id.id != object.pic.employee_id.parent_id.id else '') }}</field>
+            <field name="description">Sent notification for reopened task</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.pic.name or ''">NamaPIC</t>,<br /><br />
+                        Tugas yang sudah Anda selesaikan dengan informasi sebagai berikut : :<br />
+						 <br />
+						Nama Requester : <t t-out="object.requester.name or ''">NamaRequester</t><br />
+						Nama PIC : <t t-out="object.pic.name or ''">NamaPIC</t><br />
+						Deadline : <t t-out="format_datetime(dt=object.deadline, tz=object.pic.tz) or ''">Deadline</t><br />
+						<t t-if="object.urgent_note">Urgent Note : <t t-out="object.urgent_note or ''">Urgent Note</t><br /></t>
+						Detail Tugas : <t t-out="object.req_detail or ''">DetailTugas</t><br />
+						 <br />						 
+						Telah direopen (<t t-out="object.reopen_reason or ''">Alasan</t>). Silahkan cek tugas Anda untuk memastikan semua sudah selesai sesuai permintaan <t t-out="object.requester.name or ''">NamaRequester</t>.<br />	
+						Silahkan akses link berikut :<br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		<!-- Email template for finished Task -->
+        <record id="finished_req_task" model="mail.template">
+            <field name="name">Task is Finished</field>
+            <field name="model_id" ref="request.model_req_task"/>
+            <field name="subject">{{ ('(Urgent) ' if object.is_urgent else '') }} Task Finished: {{ (object.name) }} telah dikerjakan oleh {{ (object.pic.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.requester.email_formatted) }}</field>
+            <field name="email_cc">{{ (object.pic.email_formatted) }} {{ (object.pic_upline_mail if not object.pending_approver else '') }} {{ (object.requester_upline_mail if object.requester.employee_id.parent_id.id != object.pic.employee_id.parent_id.id else '') }}</field>
+            <field name="description">Sent notification for finished task</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.requester.name or ''">NamaRequester</t>,<br /><br />
+                        Tugas yang Anda berikan kepada <t t-out="object.pic.name or ''">PIC</t> dengan informasi sebagai berikut :<br />
+						 <br />
+						Nama Requester : <t t-out="object.requester.name or ''">NamaRequester</t><br />
+						Deadline : <t t-out="format_datetime(dt=object.deadline, tz=object.pic.tz) or ''">Deadline</t><br />
+						<t t-if="object.urgent_note">Urgent Note : <t t-out="object.urgent_note or ''">Urgent Note</t><br /></t>
+						Detail Tugas : <t t-out="object.req_detail or ''">DetailTugas</t><br />
+						 <br />						 
+						Sudah selesai. Segera cek tugas tersebut dan close tugas jika sudah sesuai.<br />	
+						Silahkan akses link berikut :<br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+		<!-- Email template for closed task -->
+        <record id="closed_req_task" model="mail.template">
+            <field name="name">Task is Closed</field>
+            <field name="model_id" ref="request.model_req_task"/>
+            <field name="subject">{{ ('(Urgent) ' if object.is_urgent else '') }} Task Closed: {{ (object.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.pic.email_formatted) }} {{ (object.requester.email_formatted) }}</field>
+            <field name="email_cc">{{ (object.pic_upline_mail) }} {{ (object.requester_upline_mail if object.requester.employee_id.parent_id.id != object.pic.employee_id.parent_id.id else '') }}</field>
+            <field name="description">Sent notification for closed task</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Tugas dengan informasi sebagai berikut :<br />
+						 <br />
+						Nama Requester : <t t-out="object.requester.name or ''">NamaRequester</t><br />
+						Nama Assignee : <t t-out="object.pic.name or ''">NamaAssignee</t><br />
+						Deadline : <t t-out="format_datetime(dt=object.deadline, tz=object.pic.tz) or ''">Deadline</t><br />
+						<t t-if="object.urgent_note">Urgent Note : <t t-out="object.urgent_note or ''">Urgent Note</t><br /></t>
+						Detail Tugas : <t t-out="object.req_detail or ''">DetailTugas</t><br />
+						 <br />						 
+						Telah closed. Terima kasih atas partisipasinya.<br />	
+						Silahkan akses link berikut :<br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+				<!-- Email template for notification -->
+        <record id="notification_req_task" model="mail.template">
+            <field name="name">Send Notification Task</field>
+            <field name="model_id" ref="request.model_req_task"/>
+            <field name="subject">{{ ('(Notification Only-Urgent Task) ' if object.is_urgent else '(Notification Only)') }} New Update On: {{ (object.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ (object.pic.email_formatted) }}, {{ (object.requester.email_formatted) }}</field>
+            <field name="email_cc">{{ (object._list_email_assignee_upline()) }}, {{ (object._list_email_requester_upline() if object.requester.employee_id.parent_id.id != object.pic.employee_id.parent_id.id else '') }}</field>
+            <field name="description">Sent notification for closed task</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.requester.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.requester.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.requester.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear Performers,<br /><br />
+                        Terdapat update untuk task ini :<br />
+						 <br />
+						Nama Requester : <t t-out="object.requester.name or ''">NamaRequester</t><br />
+						Nama Assignee : <t t-out="object.pic.name or ''">NamaAssignee</t><br />
+						Deadline : <t t-out="format_datetime(dt=object.deadline, tz=object.pic.tz) or ''">Deadline</t><br />
+						<t t-if="object.urgent_note">Urgent Note : <t t-out="object.urgent_note or ''">Urgent Note</t><br /></t>
+						Detail Tugas : <t t-out="object.req_detail or ''">DetailTugas</t><br />
+						<br />
+						Progress from Assignee : <t t-out="object.notes or ''">Progress</t><br />
+						 <br />						 
+						Silahkan akses link berikut untuk mengetahui detailnya :<br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.requester.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+	</data>
+</odoo>
+		

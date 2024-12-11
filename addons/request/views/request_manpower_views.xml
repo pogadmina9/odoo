@@ -1,0 +1,1415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  	   <!-- MPR Status -->
+
+	<record id="req_manpower_status_tree" model="ir.ui.view">
+        <field name="name">manpower.status.tree</field>
+        <field name="model">manpower.status</field>
+        <field name="arch" type="xml">
+            <tree string="Manpower Request Status" editable="top">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="fold"/>
+                <field name="done"/>
+            </tree>
+        </field>
+    </record>   	   
+	
+	<record id="req_manpower_status_action" model="ir.actions.act_window">
+        <field name="name">MPR Status</field>
+        <field name="res_model">manpower.status</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="req_manpower_status_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            MPR Status
+          </p>
+        </field>
+    </record>
+	
+	
+	<!-- MPR -->
+	
+	<record id="req_manpower_search" model="ir.ui.view">
+        <field name="name">req.manpower.search</field>
+        <field name="model">req.manpower</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+				<field name="name" string="Manpower Request" filter_domain="['|', '|', ('name', 'ilike', self), ('job_position', 'ilike', self), ('requester', 'ilike', self)]"/>
+                <field string="Request ID" name="name"/>
+                <field string="Requester" name="requester"/>
+                <field string="Position" name="job_position"/>
+                <field string="Status" name="status_id"/>
+                <filter string="Active" name="active" domain="[('is_rejected', '=', False), ('is_cancelled', '=', False)]"/>
+				<separator/>
+                    <filter string="My Request" name="my_request" domain="[('create_uid', 'in', [uid])]"/>
+                <separator/>
+                    <filter string="Need My Approval" name="need_approval" domain="[('pending_approver.user_id', '=', uid)]"/>
+				<separator/>
+                    <filter string="New" name="new" domain="[('status_id', '=', 3)]"/>
+            </search>
+        </field>
+    </record>
+	
+	<record id="req_manpower_tree" model="ir.ui.view">
+        <field name="name">req.manpower.tree</field>
+        <field name="model">req.manpower</field>
+        <field name="arch" type="xml">
+            <tree string="Manpower Request" delete="0">
+                <field name="name" string="Request ID"/>
+                <field name="status_id"/>
+                <field name="requester" optional="show"/>
+                <field name="create_date" optional="hide"/>
+                <field name="approve_date" optional="show"/>
+                <field name="job_position" string="Looking For" optional="show"/>
+                <field name="location" optional="show"/>
+                <field name="quantity" optional="show"/>
+                <field name="employee_type" optional="show"/>
+                <field name="deadline" optional="show"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="req_manpower_kanban" model="ir.ui.view">
+        <field name="name">req.manpower.kanban</field>
+        <field name="model">req.manpower</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status_id" sample="1" quick_create="false">
+                <field name="status_id" readonly="True"/>
+                <field name="color"/>
+                <field name="is_urgent"/>
+                <field name="is_cancelled"/>
+                <field name="currency_id"/>
+                <templates>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                            <div class="oe_kanban_content" tooltip="kanban-tooltip">
+                                <div class="o_kanban_record_top_left">
+                                    <b class="o_kanban_record_title"><field name="name"/><span class="badge text-bg-danger float-end" invisible="not is_urgent">Urgent</span><span class="badge text-bg-dark float-end" invisible="not is_cancelled">Cancelled</span></b>
+                                </div>
+                                <br/>
+                                <div class="o_kanban_record_body">
+                                    <span name="requester">Requester : <field name="requester"/><br/></span>
+                                    <span name="submit_date" invisible="status_id not in [1]">Create Date : <field name="create_date"/><br/></span>
+                                    <span name="submit_date" invisible="status_id not in [2]">Submit Date : <field name="submit_date"/><br/></span>
+                                    <span name="approve_date" invisible="not approve_date">Approve Date : <field name="approve_date"/><br/></span>
+                                    <br/>
+                                    <span name="requirement">Requirement<br/></span>
+                                    <span name="job_position">Job Position : <field name="job_position"/><br/></span>
+                                    <span name="employee_type">Type : <field name="employee_type"/><br/></span>
+                                    <span name="quantity">Quantity : <field name="quantity"/><br/></span>
+                                    <span name="deadline" invisible="not deadline">Deadline <field name="deadline" widget="remaining_days"/><br/></span>
+                                    <span name="pending_approver" invisible="status_id not in [2]"><br/>Pending Approver<field name="pending_approver" widget="many2many_tags"/></span>
+                                    <span name="applicants" invisible="status_id in [1,2,3] or not applicants"><br/><field name="applicants"/> Total Applicants</span>
+                                    <span name="interview_count" invisible="status_id not in [6]"><br/><field name="interview_count"/> On Going Interview</span>
+                                </div>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+	
+	<record id="req_manpower_form" model="ir.ui.view">
+        <field name="name">req.manpower.form</field>
+        <field name="model">req.manpower</field>
+        <field name="arch" type="xml">
+            <form string="Manpower Request" delete="0">
+                <sheet>
+				<header>
+				    <button string="Save" name="save" type="object"/>
+					<button string="Cancel" name="open_cancel" type="object" invisible="status_id not in [2,3,4,5,6] or current_employee != requester"/>
+					<button string="Submit" name="submit" type="object" invisible="status_id not in [1]"/>
+					<button string="Approve" name="open_approve_form" type="object" invisible="status_id not in [2] or current_employee not in [next_approver]"/>
+					<button string="Reject" name="open_reject_form" type="object" invisible="status_id not in [2] or current_employee not in [next_approver]"/>
+					<button string="Reject" name="open_reject_form" type="object" invisible="status_id in [1,2,7,8]" groups="request.group_mpr_admin, request.group_mpr_team"/>
+				    <field name="status_id" widget="statusbar_duration"/>
+                </header>
+				<span class="badge text-bg-dark float-end" invisible="not is_cancelled">Cancelled</span><span class="badge text-bg-danger float-end" invisible="not is_rejected">Rejected</span>
+                    <div class="oe_title">                        
+                        <h1>
+                            <field name="display_name" readonly="True"/>
+                        </h1>
+                    </div>
+                    <notebook>
+                            <page string="Details">
+                    <group>
+						<field name="name" invisible="True"/>
+						<field name="is_mpr_team" invisible="True"/>
+						<field name="is_cancelled" invisible="True"/>
+						<field name="is_rejected" invisible="True"/>
+						<field name="url_public" invisible="True"/>
+						<field name="dummy_save" invisible="True"/>
+						<field name="currency_id" invisible="True"/>
+						<field name="eligible_user" invisible="True" widget="many2many_tags"/>
+						<field name="interviewers" invisible="True" widget="many2many_tags"/>
+						<field name="current_employee" invisible="True"/>
+						<field name="next_approver" invisible="True"/>
+                        <group>
+                            <field name="cancel_reason" readonly="True" invisible="not cancel_reason"/>
+                            <field name="submit_date" readonly="True" invisible="not submit_date"/>
+                            <field name="requester" readonly="True" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="requester_job" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="requester_department" options="{'no_create': True, 'no_open': True}"/>
+							<field name="pending_approver" widget="many2many_tags" invisible="not pending_approver" readonly="True" force_save="1"/>
+                            <separator string="Requirement Details"/>
+                            <field name="job_position" placeholder="Eg. Sales Specialist" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]" required="True"/>
+                            <field name="location" options="{'no_create': True, 'no_open': True}" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]" required="True"/>
+                            <field name="salary_by_hc" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team"/>
+                            <label for="max_salary" string="Max. Salary &amp; Benefit" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team"/>
+                                <div class="o_row" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team">
+                                    <field name="max_salary" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+                                    <field name="benefit" placeholder="Benefit lain bila ada" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+                                </div>
+                            <field name="direct_upline" required="True" options="{'no_create': True, 'no_open': True}" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+                            <field name="candidate_department" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="employee_type" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+                            <field name="quantity" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+                            <field name="deadline" placeholder="Waktu yang ideal adalah 1 bulan" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+							<field name="mpr_reason_id" required="True" string="Request Reason" options="{'no_create': True, 'no_open': True}" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+							<field name="other_reason" invisible="mpr_reason_id not in [8]" required="mpr_reason_id in [8]" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+							<field name="attachment_ids" widget="many2many_binary_preview"/>
+                        </group>
+						<group>
+						    <separator string="Qualification of Candidate"/>
+                            <field name="age" help="Isi dengan maksimal umur yang diinginkan" required="True" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+							<field name="gender" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>                    
+							<field name="education" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>                    
+                            <field name="experience" required="True" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>    
+                            <field name="marital_status" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+                            <field name="spec_memo" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+                            <field name="skill" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]">
+                                <tree editable="bottom">
+                                    <field name="name" options="{'no_open': True}"/>
+                                    <field name="level"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <notebook>
+                            <page string="Candidate">
+                                <field name="candidate_screening_ids" readonly="not is_mpr_team">
+                                <tree no_open="1" decoration-danger="is_rejected == 2" default_order="is_rejected, id desc">
+									<button name="open_action" string="Open" type="object" class="oe_highlight"/>
+                                    <field name="is_rejected" column_invisible="True"/>
+                                    <field name="name" class="align-middle"/>
+									<field name="status_id" class="align-middle"/>
+									<field name="available_date" class="align-middle"/>
+									<field name="expected_salary" class="align-middle"/>
+									<field name="skill" widget="many2many_tags" class="align-middle"/>
+									<field name="currency_id" column_invisible="True"/>
+                                </tree>
+                            </field>
+                            </page>
+                            <page string="Activity">
+                                <field name="screening_activity_ids" readonly="not is_mpr_team">
+                                <tree editable="top" no_open="1">
+                                    <field name="manpower_request_id" column_invisible="True"/>
+                                    <field name="create_date" string="Update Time"/>
+                                    <field name="screening_id" string="Candidate" domain="[('manpower_request_id', '=', manpower_request_id)]"/>
+                                    <field name="status_id" options="{'no_open': True}"/>
+                                    <field name="name" string="Update By" readonly="True" options="{'no_open': True}"/>
+                                    <field name="note" string="Activity"/>
+                                </tree>
+                            </field>
+                            </page>
+                        </notebook>
+                    </group>
+                    </page>
+                    <page string="Approval List">
+                        <field name="manpower_approval_list_ids" readonly="True">
+                            <tree no_open="1">
+                                <field name="name" readonly="True"/>
+                                <field name="action" readonly="True"/>
+                                <field name="approval_date" readonly="True"/>								
+                                <field name="max_salary" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team"/>
+                                <field name="currency_id" column_invisible="True"/>
+                                <field name="note"/>
+                            </tree>
+						</field>
+                    </page>
+					<page string="Job Vacancies">
+						<field name="job_vacancies_ids" readonly="not is_mpr_team">
+							<tree editable="bottom" no_open="True">
+								<field name="name" required="True" class="align-middle"/>
+								<field name="posting_date" required="True" class="align-middle"/>
+								<field name="applicants" class="align-middle"/>
+								<field name="url" required="True" widget="CopyClipboardChar" class="align-middle"/>
+								<field name="write_date" string="Last Update" class="align-middle"/> 
+							</tree>
+						</field>
+                    </page>
+					<page string="Interview Schedule">
+						<field name="candidate_interview_ids" readonly="not is_mpr_team">
+							<tree create="0" delete="0">
+							    <field name="manpower_request_id" column_invisible="True"/>
+								<field name="screening_id" required="True" domain="[('manpower_request_id', '=', manpower_request_id)]" class="align-middle"/>
+								<field name="status_id" class="align-middle"/>
+								<field name="interview_mode" required="True" class="align-middle"/>
+								<field name="start" string="Schedule" widget="daterange" options="{'end_date_field': 'stop'}"/>
+								<field name="stop" class="align-middle" column_invisible="True"/>
+								<field name="duration" widget="float_time" class="align-middle"/>
+								<field name="interviewers" required="True" string="Interviewers" widget="many2many_tags" class="align-middle"/>
+								<field name="interview_url" widget="CopyClipboardChar" class="align-middle"/>
+							</tree>
+						</field>
+                    </page>
+                    <page string="Analytics">
+						<group>
+                            <field name="applicants"/>
+                            <field name="average_salary" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team"/>
+                            <field name="interview_count"/>
+                            <field name="screening_count"/>
+                        </group>
+                    </page>
+                    <page string="Time Tracking">
+						<group>
+                            <field name="create_date" string="Create On"/>
+                            <field name="submit_date" readonly="True" force_save="1"/>
+                            <field name="approve_date" readonly="True" force_save="1"/>
+                            <field name="close_date" readonly="True" force_save="1"/>
+                        </group>
+                    </page>
+					<page string="Offering Letter" invisible="status_id not in [7,8]">
+					   <field name="candidate_ol_ids" readonly="not is_mpr_team">
+							<tree editable="bottom" create="0" delete="0" decoration-danger="is_rejected == 2" default_order="is_rejected, id desc">
+                                <field name="is_rejected" column_invisible="True"/>
+                                <field name="name" readonly="True" class="align-right"/>
+                                <field name="ol_date"/>
+                                <field name="company" domain="[('category_id', '=', 11)]" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="join_date"/>
+                                <field name="ol_status"/>
+                                <field name="ol_duration" string="Duration (Months)" class="text-center"/>
+                                <field name="probation" class="text-center"/>
+                                <field name="ol_signed"/>
+                            </tree>
+						</field>
+                    </page>
+					<page string="Onboarding" invisible="status_id not in [8]">
+						<field name="candidate_onboarding_ids" readonly="True">
+							<tree create="0" no_open="True" delete="0">
+							    <field name="manpower_request_id" column_invisible="True"/>
+								<field name="screening_id" string="Candidate"/>
+								<field name="name" required="True" class="align-middle"/>
+								<field name="status_id" class="align-middle"/>
+								<field name="deadline" class="align-middle"/>
+								<field name="note" class="align-middle"/>
+							</tree>
+						</field>
+                    </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>                
+            </form>
+        </field>
+    </record>
+	
+	<record id="req_manpower_cancel_form" model="ir.ui.view">
+        <field name="name">req.manpower.cancel.form</field>
+        <field name="model">req.manpower</field>
+		<field name="priority" eval="200"/>
+        <field name="arch" type="xml">
+            <form string="Cancel Confirmation">
+                <separator string="Please Provide Cancel Reason!"/>
+				<group>
+					<field name="cancel_reason"/>
+				</group>
+				<footer>
+                    <button string="Confirm" name="cancel" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" data-hotkey="x"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+	
+	<record id="req_manpower_action" model="ir.actions.act_window">
+        <field name="name">Manpower Request</field>
+        <field name="res_model">req.manpower</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="req_manpower_kanban"/>
+		<field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add New Manpower Request Now!
+          </p>
+        </field>
+    </record>
+
+	<record id="create_req_manpower_action" model="ir.actions.act_window">
+        <field name="name">Create Manpower Request</field>
+        <field name="res_model">req.manpower</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="req_manpower_form"/>        
+    </record>
+	
+	
+		<!-- Candidate Screening -->
+	
+	<record id="candidate_screening_search" model="ir.ui.view">
+        <field name="name">candidate.screening.search</field>
+        <field name="model">candidate.screening</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+				<field name="name" string="Candidate"
+                        filter_domain="['|', '|', ('name', 'ilike', self), ('job_position', 'ilike', self), ('manpower_request_id.name', 'ilike', self)]"/>
+				<field string="Position" name="job_position"/>
+                <field string="Status" name="status_id"/>
+				<filter string="Active" name="active" domain="[('is_rejected', '=', 1)]"/>
+				<filter string="Rejected" name="rejected" domain="[('is_rejected', '=', 2)]"/>
+				<separator/>
+                    <filter string="My Request" name="my_request" domain="[('manpower_request_id.create_uid', '=', uid)]"/>
+                    <filter string="Need My Review" name="my_review" domain="[('manpower_request_id.create_uid', '=', uid), ('status_id', '=', 5)]"/>
+            </search>
+        </field>
+    </record>
+	
+	<record id="candidate_screening_tree" model="ir.ui.view">
+        <field name="name">candidate.screening.tree</field>
+        <field name="model">candidate.screening</field>
+        <field name="arch" type="xml">
+            <tree string="Candidate Screening" delete="0">
+                <field name="name"/>
+                <field name="manpower_request_id"/>
+                <field name="age" optional="show"/>
+                <field name="marital_status" optional="show"/>
+                <field name="education" optional="show"/>
+                <field name="available_date" optional="hide"/>
+                <field name="expected_salary" optional="show"/>
+                <field name="skill" widget="many2many_tags" optional="show"/>
+                <field name="currency_id" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="candidate_screening_kanban" model="ir.ui.view">
+        <field name="name">candidate.screening.kanban</field>
+        <field name="model">candidate.screening</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status_id" sample="1" quick_create="false">
+                <field name="status_id" readonly="True"/>
+                <field name="color"/>
+                <field name="currency_id"/>
+                <field name="is_rejected"/>
+                <templates>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                            <div class="oe_kanban_content" tooltip="kanban-tooltip">
+                                <div class="o_kanban_record_top_left">
+                                    <b class="o_kanban_record_title"><field name="name"/><span class="badge text-bg-danger float-end" invisible="is_rejected == 1">Rejected</span></b>
+                                </div>
+                                <br/>
+                                <div class="o_kanban_record_body">
+                                    <span name="manpower_request_id">MPR ID : <field name="manpower_request_id"/></span>
+                                    <span name="job_position"><br/>Job Position : <field name="job_position"/></span>
+                                    <span name="age" invisible="age == 0"><br/>Age : <field name="age"/> Year's</span>
+                                    <span name="marital_status"><br/>Marital Status : <field name="marital_status"/></span>
+                                    <span name="education"><br/>Education : <field name="education"/></span>
+                                    <span name="experience"><br/>Experience : <field name="experience"/></span>
+                                    <span name="break" invisible="not expected_salary and not available_date"><br/></span>
+                                    <span name="expected_salary" invisible="not expected_salary"><br/>Expected Salary : <field name="expected_salary"/></span>
+                                    <span name="available_date" invisible="not available_date"><br/>Available Date : <field name="available_date"/></span>
+                                </div>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+	
+	<record id="candidate_screening_form" model="ir.ui.view">
+        <field name="name">candidate.screening.form</field>
+        <field name="model">candidate.screening</field>
+        <field name="arch" type="xml">
+            <form string="Candidate Screening" delete="0">
+                <sheet>
+				<header>
+					<field name="status_id" widget="statusbar_duration"/>
+				</header>
+				<header>
+				    <button string="Save" name="save" type="object"/>
+				    <button string="Action" name="open_pre_action_form" type="object" invisible="not is_action_eligible or is_rejected == 2"/>
+                </header>
+				<field name="type" widget="radio" options="{'horizontal': true}" invisible="status_id not in [1]" readonly="not is_mpr_team"/>
+				<span class="badge text-bg-danger float-end" invisible="is_rejected == 1">Rejected</span>
+                    <div class="oe_title">                        
+                        <h1>
+                            <field name="name" invisible="type in ['Existing']" placeholder="Eg. John Smith " readonly="not is_mpr_team or create_date"/>
+                            <field name="candidate_database_id" invisible="type in ['New']" readonly="not is_mpr_team or create_date" force_save="1"/>
+                        </h1>
+                    </div>
+                    <notebook>
+                            <page string="Details">
+                    <group>
+						<field name="is_rejected" invisible="True"/>
+						<field name="dummy_save" invisible="True"/>
+						<field name="currency_id" invisible="True"/>
+						<field name="interviewers" invisible="True"/>
+						<field name="is_mpr_team" invisible="True"/>
+						<field name="is_action_eligible" invisible="True"/>
+                        <group>
+                            <field name="create_date" invisible="not create_date"/>
+                            <field name="manpower_request_id" string="MPR ID" readonly="True"/>
+                            <field name="candidate_source_id" options="{'no_create': True, 'no_open': True}" readonly="not is_mpr_team"/>
+							<field name="dob" readonly="not is_mpr_team"/>
+							<label for="age" string="Age"/>
+							<div class="o_row o_hr_narrow_field">
+                                <field name="age" readonly="not is_mpr_team"/><span name="age"> Years</span>
+                            </div>
+							<field name="gender" readonly="not is_mpr_team" required="True"/>                            
+                            <field name="education" readonly="not is_mpr_team" required="True"/>                            
+                            <field name="experience" readonly="not is_mpr_team" required="True"/>
+                            <field name="marital_status" readonly="not is_mpr_team"/>
+							<label for="expected_salary" string="Expected Salary &amp; Benefit" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team"/>
+                                <div class="o_row" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team">
+                                    <field name="expected_salary" readonly="uid not in interviewers and not is_mpr_team"/>
+                                    <field name="benefit" placeholder="Benefit lain bila ada" readonly="uid not in interviewers and not is_mpr_team"/>
+                                </div>
+							<field name="available_date" readonly="uid not in interviewers and not is_mpr_team"/>
+                        </group>
+						<group>
+							<separator string="Reject Information" invisible="is_rejected == 1"/>
+							<field name="reject_by" invisible="is_rejected == 1" readonly="True"/>
+							<field name="reject_reason" invisible="is_rejected == 1" string="Reason" options="{'no_create': True, 'no_open': True}" readonly="True"/>
+							<field name="other_reject_reason" invisible="not other_reject_reason" required="reject_reason in [6]" string="Other Reason" readonly="True"/>
+							<field name="update_reject_by" invisible="is_rejected == 1" readonly="True" force_save="1"/>
+							<separator string="CV &amp; Skill's"/>
+						    <field name="attachment_ids" widget="many2many_binary_preview"/>
+							<field name="skill" readonly="uid not in interviewers and not is_mpr_team">
+                                <tree editable="bottom">
+                                    <field name="name" options="{'no_open': True}"/>
+                                    <field name="level"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <notebook>
+                            <page string="Screening &amp; Interview Results">
+                                <field name="screening_result_ids">
+                                <tree editable="top" create="0" delete="0">
+                                    <field name="candidate_action_id" column_invisible="True"/>
+                                    <field name="candidate_interview_id" column_invisible="True"/>
+                                    <field name="write_date" class="align-middle"/>
+                                    <field name="status_id" class="align-middle" options="{'no_create': True, 'no_open': True}" readonly="True"/>
+                                    <field name="name" string="Update By" class="align-middle" readonly="True" options="{'no_create': True, 'no_open': True}"/>
+                                    <field name="note" class="align-middle" readonly="uid != name"/>
+									<field name="attachment_ids" widget="many2many_binary" readonly="uid != name"/>
+                                </tree>
+                            </field>
+                            </page>
+                            <page string="Activity" >
+                                <field name="screening_activity_ids" readonly="not is_mpr_team">
+                                <tree editable="top" delete="0">
+                                    <field name="create_date" class="align-middle"/>
+                                    <field name="status_id" options="{'no_create': True, 'no_open': True}" class="align-middle"/>
+                                    <field name="name" string="Update By" readonly="True" options="{'no_create': True, 'no_open': True}" class="align-middle"/>
+                                    <field name="note" string="Activity" readonly="uid != name" class="align-middle"/>
+                                </tree>
+                            </field>
+                            </page>
+                        </notebook>
+                    </group>
+                    </page>
+					<page string="Interview Schedule">
+						<field name="candidate_interview_ids" readonly="not is_mpr_team">
+							<tree delete="0" create="0">
+							    <field name="manpower_request_id" column_invisible="True"/>
+							    <field name="candidate_status_id" class="align-middle"/>
+								<field name="interview_mode" class="align-middle"/>
+								<field name="start" string="Schedule" widget="daterange" options="{'end_date_field': 'stop'}"/>
+								<field name="stop" class="align-middle" column_invisible="True"/>
+								<field name="duration" widget="float_time" class="align-middle"/>
+								<field name="interviewers" string="Interviewers" widget="many2many_tags" class="align-middle"/>
+								<field name="interview_url" widget="CopyClipboardChar" class="align-middle"/>
+							</tree>
+						</field>
+                    </page>
+					<page string="Offering Letter" invisible="status_id not in [10,11]">
+					    <group>
+    						<group>
+                                <field name="ol_date" readonly="not is_mpr_team"/>
+                                <field name="company" domain="[('category_id', '=', 11)]" readonly="not is_mpr_team"/>
+                                <field name="join_date" readonly="not is_mpr_team"/>
+                                <field name="ol_status" readonly="not is_mpr_team"/>
+                                <field name="ol_duration" readonly="not is_mpr_team"/>
+                                <field name="probation" readonly="not is_mpr_team"/>
+                                <field name="ol_signed" readonly="not is_mpr_team"/>
+                            </group>
+    						<group>
+    						</group>
+    				    </group>
+                    </page>
+					<page string="Onboarding" invisible="status_id not in [11]">
+						<field name="candidate_onboarding_ids" readonly="True">
+							<tree no_open="True" delete="0" create="0">
+							    <field name="manpower_request_id" column_invisible="True"/>
+								<field name="screening_id" column_invisible="True"/>
+								<field name="name" required="True" class="align-middle"/>
+								<field name="status_id" class="align-middle"/>
+								<field name="pic" options="{'no_create': True, 'no_open': True}" widget="many2many_tags" class="align-middle"/>
+								<field name="deadline" class="align-middle"/>
+								<field name="note" class="align-middle"/>
+							</tree>
+						</field>
+                    </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>                
+            </form>
+        </field>
+    </record>
+	
+	<record id="pre_action_form" model="ir.ui.view">
+        <field name="name">pre.action.form</field>
+        <field name="model">candidate.screening</field>
+		<field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <form string="Select Action">
+                <sheet>
+                <header>
+                    <div><h1><span name="title">Please Choose The Action!</span></h1></div>
+                </header>
+                </sheet>
+                <footer>
+				    <button string="Proceed Candidate" name="open_action_form" class="oe_highlight" type="object"/>
+                    <button string="Reject Candidate" name="open_reject_form" type="object"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+	
+	<record id="candidate_screening_reject_form" model="ir.ui.view">
+        <field name="name">candidate.screening.reject.form</field>
+        <field name="model">candidate.screening</field>
+		<field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <form string="Reject Information">
+                <separator string="Please Fill The Reason"/>
+                <group>
+                    <field name="update_reject_by" invisible="True"/>
+                    <field name="reject_by" required="True"/>
+                    <field name="reject_reason" string="Reason" options="{'no_create': True, 'no_open': True}" required="True"/>
+                    <field name="other_reject_reason" string="Note" required="True"/>
+                </group>
+                <footer>
+                    <button string="Submit" name="reject" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" data-hotkey="x"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+	
+	<record id="candidate_screening_ol_form" model="ir.ui.view">
+        <field name="name">candidate.screening.ol.form</field>
+        <field name="model">candidate.screening</field>
+		<field name="priority" eval="200"/>
+        <field name="arch" type="xml">
+            <form string="Offering Letter Information">
+                <group>
+					<group>
+						<field name="ol_date" required="True"/>
+                        <field name="company" domain="[('category_id', '=', 11)]" required="True" options="{'no_create': True, 'no_open': True}"/>
+						<field name="join_date" required="True"/>
+                        <field name="ol_status" required="True"/>
+                        <field name="ol_duration" required="ol_status not in ['Permanent']"/>
+                        <field name="probation"/>
+						<field name="ol_signed"/>
+                    </group>
+					<group>
+    				</group>
+    			</group>
+				<footer>
+                    <button string="Submit" name="confirm_ol" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" data-hotkey="x"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+	
+	<record id="candidate_screening_onboarding_form" model="ir.ui.view">
+        <field name="name">candidate.screening.onboarding.form</field>
+        <field name="model">candidate.screening</field>
+		<field name="priority" eval="200"/>
+        <field name="arch" type="xml">
+            <form string="Onboarding Confirmation">
+				<separator string="Please Make Sure Information Below Is Valid!"/>
+                <group>
+					<group>
+						<field name="ol_date" required="True"/>
+                        <field name="company" domain="[('category_id', '=', 11)]" required="True"/>
+						<field name="join_date" required="True"/>
+                        <field name="ol_status" required="True"/>
+                        <field name="ol_duration" required="ol_status not in ['Permanent']"/>
+                        <field name="probation"/>
+						<field name="ol_signed" required="True"/>
+                    </group>
+					<group>
+    				</group>
+    			</group>
+				<footer>
+                    <button string="Submit" name="confirm_onboarding" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" data-hotkey="x"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+	
+	<record id="candidate_screening_action" model="ir.actions.act_window">
+        <field name="name">Candidate Screening</field>
+        <field name="res_model">candidate.screening</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="candidate_screening_kanban"/>
+		<field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add New Candidate Now
+          </p>
+        </field>
+    </record>
+
+	<record id="create_candidate_screening_action" model="ir.actions.act_window">
+        <field name="name">Add Candidate</field>
+        <field name="res_model">candidate.screening</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="candidate_screening_form"/>        
+    </record>
+	
+		<!-- Candidate Action -->
+	
+	<record id="candidate_action_form" model="ir.ui.view">
+        <field name="name">candidate.action.form</field>
+        <field name="model">candidate.action</field>
+        <field name="arch" type="xml">
+            <form string="Candidate Screening">
+                <sheet>
+					<div class="oe_title">                        
+                        <h1>
+                            <field name="screening_id" readonly="True"/>
+                        </h1>
+                    </div>
+                    <group>
+						<field name="manpower_request_id" string="MPR ID" invisible="True"/>
+						<field name="dynamic_domain" invisible="True"/>
+						<field name="stop" invisible="True"/>
+                        <group>
+							<separator string="Screening &amp; Interview Result"/>
+							<field name="screening_status_id" options="{'no_create': True, 'no_open': True}" readonly="True" force_save="1"/>
+							<field name="interview_done" invisible="screening_status_id not in [3,6,7,8,9]" widget="radio"/>
+							<field name="reschedule_reason" invisible="interview_done in ['Yes']" required="interview_done in ['No']"/>
+							<field name="memo" invisible="interview_done in ['Yes']" required="interview_done in ['No']"/>
+							<field name="result" required="interview_done in ['Yes']" invisible="interview_done in ['No']"/>
+							<field name="attachment_ids" widget="many2many_binary"/>
+                        </group>
+						<group>
+							<separator string="Next Step"/>
+							<field name="interview_status_id" options="{'no_create': True, 'no_open': True}" domain="dynamic_domain" invisible="interview_done in ['No']"/>
+							<field name="interview_status_id" options="{'no_create': True, 'no_open': True}" string="Reschedule" domain="dynamic_domain" invisible="interview_done in ['Yes']"/>
+							<field name="interviewers" widget="many2many_tags" invisible="interview_status_id not in [3,6,7,8,9]" options="{'no_create': True, 'no_open': True}" />
+							<field name="interview_mode" invisible="interview_status_id not in [3,6,7,8,9]" required="interview_status_id in [3,6,7,8,9]"/>
+							<field name="start" widget="daterange" options="{'end_date_field': 'stop'}" string="Proposed Schedule" invisible="interview_status_id not in [3,6,7,8,9]"/>
+							<label for="duration" string="Duration" invisible="interview_status_id not in [3,6,7,8,9]"/>/>
+							<div class="o_row o_hr_narrow_field" invisible="interview_status_id not in [3,6,7,8,9]">
+                                <field name="duration" widget="float_time"/><span name="duration" invisible="duration &lt;= 1"> Hours</span><span name="duration" invisible="duration &gt; 1"> Hour</span>
+                            </div>
+                        </group>
+                    </group>
+					<footer>
+				    <button string="Submit" name="submit_action" class="oe_highlight" type="object"/>
+                    <button string="Cancel" special="cancel" data-hotkey="x"/>
+                </footer>
+                </sheet>          
+            </form>
+        </field>
+    </record>
+		
+		
+		
+		<!-- Candidate Database -->
+	
+	<record id="candidate_database_search" model="ir.ui.view">
+        <field name="name">candidate.database.search</field>
+        <field name="model">candidate.database</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+				<field name="name" string="Candidate" filter_domain="['|', '|', '|', ('name', 'ilike', self), ('candidate_screening_ids.job_position', 'ilike', self), ('experience', 'ilike', self), ('skill.name.name', 'ilike', self)]"/>
+                <field string="Name" name="name"/>
+                <field string="Position" name="candidate_screening_ids" filter_domain="[('candidate_screening_ids.job_position', 'ilike', self)]"/>
+                <field string="Skill" name="skill" filter_domain="[('skill.name.name', 'ilike', self)]"/>
+                <filter string="Available" name="available" domain="[('screening_id', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+	
+	<record id="candidate_database_tree" model="ir.ui.view">
+        <field name="name">candidate.database.tree</field>
+        <field name="model">candidate.database</field>
+        <field name="arch" type="xml">
+            <tree string="Candidate Database" delete="0">
+                <field name="name"/>
+                <field name="candidate_source_id"/>
+                <field name="gender"/>
+                <field name="age"/>
+                <field name="education"/>
+                <field name="experience"/>
+				<field name="skill" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="candidate_database_form" model="ir.ui.view">
+        <field name="name">candidate.database.form</field>
+        <field name="model">candidate.database</field>
+        <field name="arch" type="xml">
+            <form string="Candidate Database" delete="0">
+                <sheet>
+				<header>
+				    <button string="Save" name="save" type="object"/>
+                </header>
+                    <div class="oe_title">                        
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <notebook>
+                            <page string="Details">
+                    <group>
+						<field name="dummy_save" invisible="True"/>
+						<field name="screening_id" invisible="True"/>
+                        <group>
+                            <field name="create_date" invisible="not create_date"/>
+							<field name="manpower_request_id" invisible="not manpower_request_id" options="{'no_create': True}" />                            
+							<field name="candidate_source_id" options="{'no_create': True, 'no_open': True}" />                            
+							<field name="dob"/>
+							<label for="age" string="Age"/>
+							<div class="o_row o_hr_narrow_field">
+                                <field name="age"/><span name="age"> Years</span>
+                            </div>                            
+							<field name="gender"/>                            
+                            <field name="education"/>                            
+                            <field name="experience"/>    
+                            <field name="marital_status"/>
+                        </group>
+						<group>
+						    <field name="attachment_ids" widget="many2many_binary_preview"/>
+							<field name="skill">
+                                <tree editable="bottom">
+                                    <field name="name" options="{'no_open': True}"/>
+                                    <field name="level"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <notebook>
+                            <page string="Interview History">
+                                <field name="candidate_screening_ids" readonly="True">
+                                <tree>
+                                    <field name="write_date" string="Last Update"/>
+                                    <field name="manpower_request_id"/>
+                                    <field name="job_position" string="Applied For"/>
+                                    <field name="status_id" string="Last Status"/>
+                                    <field name="expected_salary" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team"/>
+                                </tree>
+                            </field>
+                            </page>
+                        </notebook>
+                    </group>
+                    </page>                    
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>                
+            </form>
+        </field>
+    </record>
+	
+	<record id="candidate_database_action" model="ir.actions.act_window">
+        <field name="name">Candidate Database</field>
+        <field name="res_model">candidate.database</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="candidate_database_tree"/>
+		<field name="context">{'search_default_available': 1}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add New Candidate Now
+          </p>
+        </field>
+    </record>
+	
+			<!-- Approval -->
+			
+	<record id="manpower_approval_list_form" model="ir.ui.view">
+        <field name="name">manpower.approval.list.form</field>
+        <field name="model">manpower.approval.list</field>
+		<field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <form string="Approve">
+                <separator string="Fill The Note If Necessary"/>
+                <group>
+                    <field name="manpower_request_id" invisible="True"/>
+                    <field name="name" invisible="True"/>
+                    <field name="approval_date" invisible="True"/>
+                    <field name="action" required="True"/>
+                    <field name="note" class="w-100" required="action in ['Reject']"/>
+                </group>
+                <footer>
+                    <button string="Submit" name="action_submit" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" class="oe_link" special="cancel" data-hotkey="x"/>
+                </footer>
+           </form>
+        </field>
+    </record>		
+			
+	<record id="manpower_approval_list_action" model="ir.actions.act_window">
+        <field name="name">Approval List</field>
+        <field name="res_model">manpower.approval.list</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="manpower_approval_list_form"/>
+		<field name="context">{
+            'default_manpower_request_id': active_id,
+			'default_max_salary': max_salary
+        }</field>
+        <field name="target">new</field>
+    </record>
+	
+			<!-- Skill -->
+			
+	<record id="skill_tree" model="ir.ui.view">
+        <field name="name">skill.tree</field>
+        <field name="model">skill</field>
+        <field name="arch" type="xml">
+            <tree string="Skill List" editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>	
+			
+	<record id="skill_action" model="ir.actions.act_window">
+        <field name="name">Skills List</field>
+        <field name="res_model">skill</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="skill_tree"/>
+		<field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add New Skill Now
+          </p>
+        </field>
+    </record>
+	
+			<!-- Request Reason -->
+			
+	<record id="mpr_reason_tree" model="ir.ui.view">
+        <field name="name">mpr.reason.tree</field>
+        <field name="model">mpr.reason</field>
+        <field name="arch" type="xml">
+            <tree string="Request Reason" editable="bottom">
+                <field name="name"/>
+                <field name="sequence" widget="handle"/>
+            </tree>
+        </field>
+    </record>	
+			
+	<record id="mpr_reason_action" model="ir.actions.act_window">
+        <field name="name">Request Reason</field>
+        <field name="res_model">mpr.reason</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="mpr_reason_tree"/>
+		<field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No Records Found
+          </p>
+        </field>
+    </record>
+	
+			<!-- Candidate Reject Reason -->
+			
+	<record id="candidate_reject_reason_tree" model="ir.ui.view">
+        <field name="name">candidate.reject.reason.tree</field>
+        <field name="model">candidate.reject.reason</field>
+        <field name="arch" type="xml">
+            <tree string="Candidate Reject Reason" editable="bottom">
+                <field name="name"/>
+                <field name="sequence" widget="handle"/>
+            </tree>
+        </field>
+    </record>	
+			
+	<record id="candidate_reject_reason_action" model="ir.actions.act_window">
+        <field name="name">Candidate Reject Reason</field>
+        <field name="res_model">candidate.reject.reason</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="candidate_reject_reason_tree"/>
+		<field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No Records Found
+          </p>
+        </field>
+    </record>
+	
+			<!-- Working Location -->
+			
+	<record id="working_location_tree" model="ir.ui.view">
+        <field name="name">working.location.tree</field>
+        <field name="model">working.location</field>
+        <field name="arch" type="xml">
+            <tree string="Working Location" editable="bottom">
+                <field name="name"/>
+                <field name="sequence" widget="handle"/>
+            </tree>
+        </field>
+    </record>	
+			
+	<record id="working_location_action" model="ir.actions.act_window">
+        <field name="name">Working Location</field>
+        <field name="res_model">working.location</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="working_location_tree"/>
+		<field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No Records Found
+          </p>
+        </field>
+    </record>	
+	
+	
+			<!-- Onboarding Item -->
+			
+	<record id="onboarding_item_tree" model="ir.ui.view">
+        <field name="name">onboarding.item.tree</field>
+        <field name="model">onboarding.item</field>
+        <field name="arch" type="xml">
+            <tree string="Onboarding Item" editable="bottom">
+                <field name="name"/>
+                <field name="pic" options="{'no_create': True, 'no_open': True}" widget="many2many_tags"/>
+                <field name="sequence" widget="handle"/>
+            </tree>
+        </field>
+    </record>	
+			
+	<record id="onboarding_item_action" model="ir.actions.act_window">
+        <field name="name">Onboarding Item</field>
+        <field name="res_model">onboarding.item</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="onboarding_item_tree"/>
+		<field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No Records Found
+          </p>
+        </field>
+    </record>
+	
+	
+			<!-- Candidate Interview -->
+	
+	<record id="candidate_interview_search" model="ir.ui.view">
+        <field name="name">candidate.interview.search</field>
+        <field name="model">candidate.interview</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+				<field name="screening_id" string="Candidate"
+                        filter_domain="['|', '|', ('screening_id.name', 'ilike', self), ('job_position', 'ilike', self), ('manpower_request_id.name', 'ilike', self)]"/>
+				<field string="Position" name="job_position"/>
+                <field string="Status" name="status_id"/>
+				<separator/>
+                    <filter string="My Request" name="my_request" domain="[('manpower_request_id.create_uid', '=', uid)]"/>
+					<filter string="My Interview" name="my_interview" domain="[('interviewers.user_id', '=', uid)]"/>
+            </search>
+        </field>
+    </record>
+	
+	<record id="candidate_interview_calendar" model="ir.ui.view">
+        <field name="name">candidate.interview.calendar</field>
+        <field name="model">candidate.interview</field>
+        <field name="priority" eval="2"/>
+        <field name="arch" type="xml">
+            <calendar date_start="start" date_stop="stop" date_delay="duration" color="interview_mode" create="0" delete="0">
+                <field name="screening_id"/>
+				<field name="manpower_request_id" string="MPR ID"/>
+				<field name="job_position" filters="1"/>
+				<field name="interviewers"/>
+				<field name="interview_mode" filters="1"/>
+				<field name="interview_url" invisible="interview_mode in ['Offline']" widget="CopyClipboardChar"/>
+            </calendar>
+        </field>
+    </record>
+	
+	<record id="candidate_interview_form" model="ir.ui.view">
+        <field name="name">candidate.interview.form</field>
+        <field name="model">candidate.interview</field>
+        <field name="priority" eval="2"/>
+        <field name="arch" type="xml">
+            <form string="Meetings" delete="0">
+                <sheet>
+					<header>
+						<field name="status_id" widget="statusbar_duration"/>
+						<button string="Save" name="save" type="object"/>
+						<button name="confirm_all" string="Confirm All" type="object" groups="request.group_mpr_admin, request.group_mpr_team" invisible="not pending_confirm"/>
+						<button name="candidate_confirm" string="Candidate Confirm" type="object" groups="request.group_mpr_admin, request.group_mpr_team" invisible="status_id not in [2]"/>
+						<button name="open_interview_confirmation" string="Action" type="object" invisible="current_employee not in interviewers and not is_mpr_team or status_id in [4]"/>
+						<button name="done" string="Mark As Done" type="object" invisible="not is_mpr_team or status_id in [4]"/>
+					</header>
+                    <div class="o_row">
+                        <h1 class="w-100"><field name="screening_id" colspan="2" readonly="True"/></h1>
+                    </div>
+					<notebook>
+					<page string="Details">
+					<group>
+						<field name="pending_confirm" invisible="True" widget="many2many_tags"/>
+						<field name="current_employee" invisible="True"/>
+						<field name="is_mpr_team" invisible="True"/>
+						<group>
+							<field name="manpower_request_id" string="MPR ID" readonly="True"/>
+							<field name="candidate_status_id" options="{'no_create': True, 'no_open': True}" readonly="True"/>
+							<field name="job_position"/>
+							<field name="start" widget="daterange" options="{'end_date_field': 'stop'}" string="Schedule" readonly="True" force_save="1"/>
+							<label for="duration" string="Duration"/>
+							<div class="o_row o_hr_narrow_field">
+                                <field name="duration" widget="float_time" readonly="True" force_save="1"/><span name="duration" invisible="duration &lt;= 1"> Hours</span><span name="duration" invisible="duration &gt; 1"> Hour</span>
+                            </div>
+							<field name="interview_mode" readonly="True" force_save="1"/>
+							<field name="interviewers" widget="many2many_tags" readonly="True" force_save="1"/>
+							<field name="interview_url" invisible="interview_mode in ['Offline']" widget="CopyClipboardChar" readonly="not is_mpr_team" force_save="1"/>
+						</group>
+						<group>
+							<field name="stop" invisible="1"/>
+						</group>
+					</group>
+					</page>
+					<page string="Interview Result">
+						<field name="screening_result_ids">
+							<tree editable="top" create="0" delete="0">
+                                    <field name="candidate_action_id" column_invisible="True"/>
+                                    <field name="candidate_interview_id" column_invisible="True"/>
+                                    <field name="write_date" class="align-middle"/>
+                                    <field name="status_id" class="align-middle" options="{'no_create': True, 'no_open': True}" readonly="True"/>
+                                    <field name="name" string="Update By" class="align-middle" readonly="True" options="{'no_create': True, 'no_open': True}"/>
+                                    <field name="note" class="align-middle" readonly="uid != name"/>
+									<field name="attachment_ids" widget="many2many_binary" readonly="uid != name"/>
+                                </tree>
+						</field>
+					</page>
+					</notebook>
+					<notebook>
+							<page string="Confirmation List">
+                                <field name="interview_confirmation_ids" readonly="True">
+                                <tree decoration-danger="valid == 2" no_open="1">
+                                    <field name="name"/>
+                                    <field name="candidate_interview_id" column_invisible="True"/>
+                                    <field name="action_date"/>
+                                    <field name="action"/>
+                                    <field name="start" widget="daterange" options="{'end_date_field': 'stop'}" string="Schedule"/>
+                                    <field name="stop" column_invisible="True"/>
+									<field name="interview_mode" readonly="True"/>
+                                    <field name="valid" column_invisible="True"/>
+                                    <field name="note"/>
+                                </tree>
+								</field>
+                            </page>
+                        </notebook>
+                </sheet>
+				<div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>   
+            </form>
+        </field>
+    </record>
+	
+	<record id="candidate_interview_kanban" model="ir.ui.view">
+        <field name="name">candidate.interview.kanban</field>
+        <field name="model">candidate.interview</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status_id" sample="1" quick_create="false">
+                <field name="status_id" readonly="True"/>
+                <field name="color"/>
+                <templates>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                            <div class="oe_kanban_content" tooltip="kanban-tooltip">
+                                <div class="o_kanban_record_top_left">
+                                    <b class="o_kanban_record_title"><field name="screening_id"/></b>
+                                </div>
+                                <br/>
+                                <div class="o_kanban_record_body">
+									<span name="manpower_request_id">MPR ID : <field name="manpower_request_id"/></span>
+                                    <span name="candidate_status_id"><br/>Stage : <field name="candidate_status_id"/></span>
+                                    <span name="job_position"><br/>Position : <field name="job_position"/></span>
+                                    <span name="interview_mode"><br/>Interview Mode : <field name="interview_mode"/></span>
+									<span name="schedule"><br/>Schedule : <field name="start" widget="daterange" options="{'end_date_field': 'stop'}"/></span>
+                                    <span name="break"><br/></span>
+                                    <span name="interviewers"><br/>Interviewers : <field name="interviewers"/></span>
+                                </div>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+			
+	<record id="action_candidate_interview" model="ir.actions.act_window">
+        <field name="name">Interview Schedule</field>
+        <field name="res_model">candidate.interview</field>
+        <field name="view_mode">calendar,kanban,form</field>
+        <field name="view_id" ref="candidate_interview_calendar"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No interview found. Let's schedule one!
+          </p>
+        </field>
+    </record>
+	
+	
+			<!-- Interview Confirmation -->
+				
+	<record id="interview_confirmation_form" model="ir.ui.view">
+        <field name="name">interview.confirmation.form</field>
+        <field name="model">interview.confirmation</field>
+        <field name="priority" eval="2"/>
+        <field name="arch" type="xml">
+            <form string="Interview Confirmation">
+                <sheet>
+                    <div class="o_row">
+                        <h1 class="w-100"><field name="candidate_interview_id" colspan="2" readonly="True"/></h1>
+                    </div>
+					<group>
+						<group>
+							<field name="valid" invisible="True"/>
+							<field name="name" invisible="True"/>
+							<field name="start" widget="daterange" options="{'end_date_field': 'stop'}" string="Schedule" readonly="action in ['Confirm']" force_save="1" invisible="action in ['Cancel For Me']"/>
+							<field name="interview_mode" readonly="action in ['Confirm']" force_save="1" invisible="action in ['Cancel For Me']"/>
+							<field name="interviewers" invisible="action not in ['Delegate / Reschedule']" widget="many2many_tags" options="{'no_create': True, 'no_open': True}"/>/>
+							<field name="action" required="True"/>
+							<field name="note" placeholder="Opsional" invisible="action not in ['Confirm']"/>
+							<field name="note" placeholder="Wajib Diisi" invisible="action in ['Confirm']" required="True"/>
+						</group>
+						<group>
+							<field name="stop" invisible="1"/>
+						</group>
+					</group>
+					<footer>
+						<button string="Submit" name="action_submit" type="object" class="oe_highlight" data-hotkey="q"/>
+						<button string="Cancel" class="oe_link" special="cancel" data-hotkey="x"/>
+					</footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+	<record id="action_interview_confirmation" model="ir.actions.act_window">
+        <field name="name">Interview Confirmation</field>
+        <field name="res_model">interview.confirmation</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="interview_confirmation_form"/>
+    </record>
+
+			<!-- Candidate Onboarding -->
+			
+	<record id="candidate_onboarding_search" model="ir.ui.view">
+        <field name="name">candidate.onboarding.search</field>
+        <field name="model">candidate.onboarding</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+				<field name="name" string="Onboarding" filter_domain="['|', '|', '|', ('name.name', 'ilike', self), ('screening_id.name', 'ilike', self), ('company.name', 'ilike', self), ('manpower_request_id.name', 'ilike', self)]"/>
+                <field string="Item" name="name" filter_domain="[('name.name', 'ilike', self)]"/>
+                <filter string="My Responsibility" name="my_responsibility" domain="[('pic.user_id', '=', uid)]"/>
+                <filter string="Late" name="late" domain="[('deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+            </search>
+        </field>
+    </record>
+			
+	<record id="candidate_onboarding_form" model="ir.ui.view">
+        <field name="name">candidate.onboarding.form</field>
+        <field name="model">candidate.onboarding</field>
+        <field name="priority" eval="2"/>
+        <field name="arch" type="xml">
+            <form string="Candidate Onboarding" delete="0">
+                <sheet>
+					<header>
+						<field name="status_id" widget="statusbar_duration" options="{'clickable': True}" invisible="current_employee not in pic"/>
+						<field name="status_id" widget="statusbar_duration" invisible="current_employee in pic"/>
+						<button string="Save" name="save" type="object"/>
+					</header>
+                    <div class="o_row">
+                        <h1 class="w-100"><field name="screening_id" colspan="2" readonly="True"/> / <field name="name" colspan="2" readonly="True" options="{'no_create': True, 'no_open': True}"/></h1>
+                    </div>
+					<group>
+						<group>
+							<field name="manpower_request_id" string="MPR ID" readonly="True"/>
+							<field name="job_position"/>
+							<field name="company" domain="[('category_id', '=', 11)]" options="{'no_create': True, 'no_open': True}" readonly="True"/>
+							<field name="deadline" readonly="True"/>
+							<field name="pic" widget="many2many_tags" options="{'no_create': True, 'no_open': True}" readonly="True"/>
+							<field name="current_employee" invisible="True"/>
+							<field name="note" readonly="current_employee not in pic" required="status_id not in [1]"/>
+						</group>
+						<group>
+						</group>
+					</group>
+				</sheet>
+            </form>
+        </field>
+    </record>
+	
+	<record id="candidate_onboarding_kanban" model="ir.ui.view">
+        <field name="name">candidate.onboarding.kanban</field>
+        <field name="model">candidate.onboarding</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status_id" sample="1" quick_create="false">
+                <field name="status_id" readonly="True"/>
+                <field name="color"/>
+                <templates>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                            <div class="oe_kanban_content" tooltip="kanban-tooltip">
+                                <div class="o_kanban_record_top_left">
+                                    <b class="o_kanban_record_title"><field name="screening_id"/></b>
+                                    <br/><b class="o_kanban_record_title"><field name="name"/></b>
+                                </div>
+                                <br/>
+                                <div class="o_kanban_record_body">
+									<span name="manpower_request_id">MPR ID : <field name="manpower_request_id"/></span>
+								    <span name="company"><br/>Company : <field name="company"/></span>
+                                    <span name="job_position"><br/>Position : <field name="job_position"/></span>
+                                    <span name="deadline"><br/>Deadline : <field name="deadline"/></span>
+                                    <span name="pic"><br/>PIC : <field name="pic" widget="many2many_tags"/></span>
+                                </div>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+			
+	<record id="candidate_onboarding_action" model="ir.actions.act_window">
+        <field name="name">Candidate Onboarding</field>
+        <field name="res_model">candidate.onboarding</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="view_id" ref="candidate_onboarding_kanban"/>
+		<field name="context">{'search_default_my_responsibility': 1}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No Onboarding Found. Let's Create One!
+          </p>
+        </field>
+    </record>
+	
+	
+			<!-- Menu Inherit -->
+			
+	<menuitem
+        id="menu_req_manpower"
+        name="Manpower Request"
+        parent="maintenance.menu_maintenance_title"
+		groups="request.group_manager_bod,request.group_supervisor,request.group_mpr_admin,request.group_mpr_team"
+        sequence="3"/>
+		
+	<menuitem
+        id="menu_req_manpower_candidate"
+        name="Candidate"
+        parent="request.menu_req_manpower"
+        sequence="1"/>
+		
+		
+	<menuitem
+        id="menu_candidate_database"
+        name="Database"
+        parent="request.menu_req_manpower_candidate"
+		groups="request.group_mpr_admin,request.group_mpr_team"
+        action="candidate_database_action"
+        sequence="1"/>
+		
+	<menuitem
+        id="menu_candidate_onboarding"
+        name="Onboarding"
+        parent="request.menu_req_manpower_candidate"
+        action="candidate_onboarding_action"
+        sequence="2"/>
+		
+	<menuitem
+        id="menu_candidate_screening"
+        name="Screening"
+        parent="request.menu_req_manpower_candidate"
+        action="candidate_screening_action"
+        sequence="3"/>
+		
+	<menuitem
+        id="menu_req_manpower_interview"
+        name="Interview"
+        parent="request.menu_req_manpower"
+        sequence="1"/>
+	
+	<menuitem
+        id="menu_interview_schedule"
+        name="Schedule"
+        parent="request.menu_req_manpower_interview"
+        action="action_candidate_interview"
+        sequence="1"/>
+		
+	<menuitem
+        id="menu_req_manpower_configuration"
+        name="Configuration"
+        groups="request.group_mpr_admin"
+        parent="request.menu_req_manpower"
+        sequence="3"/>
+		
+		
+	<menuitem
+        id="menu_onboarding_item"
+        name="Onboarding Item"
+        parent="request.menu_req_manpower_configuration"
+        action="onboarding_item_action"
+        sequence="1"/>
+	
+	<menuitem
+        id="menu_reject_reason"
+        name="Reject Reason"
+        parent="request.menu_req_manpower_configuration"
+        action="candidate_reject_reason_action"
+        sequence="2"/>
+	
+	<menuitem
+        id="menu_request_reason"
+        name="Request Reason"
+        parent="request.menu_req_manpower_configuration"
+        action="mpr_reason_action"
+        sequence="3"/>
+			
+	<menuitem
+        id="menu_skills"
+        name="Skills"
+        parent="request.menu_req_manpower_configuration"
+        action="skill_action"
+        sequence="4"/>	
+		
+	<menuitem
+        id="menu_team_mpr_config"
+        name="Team"
+        parent="request.menu_req_manpower_configuration"
+        groups="request.group_mpr_admin"
+        action="req_team_config_form_action"
+        sequence="5"/>	
+		
+	<menuitem
+        id="menu_working_location"
+        name="Working Location"
+        parent="request.menu_req_manpower_configuration"
+        action="working_location_action"
+        sequence="6"/>
+		
+</odoo>

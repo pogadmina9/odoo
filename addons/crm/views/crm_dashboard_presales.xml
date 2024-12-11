@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- presales.team : views -->
+
+    <record id="presales_team_view_search" model="ir.ui.view">
+        <field name="name">crm.presales.team.search</field>
+        <field name="model">crm.presales.team</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field string="Name" name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="presales_team_kanban" model="ir.ui.view">
+        <field name="name">crm.presales.team.kanban</field>
+        <field name="model">crm.presales.team</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard o_maintenance_team_kanban" create="0">
+                <field name="name"/>
+                <field name="color"/>
+                <field name="project_count_ids"/>
+                <field name="project_count"/>
+                <field name="project_progress"/>
+                <field name="project_win"/>
+                <field name="project_lose"/>
+                <templates>                    
+                    <t t-name="kanban-box">
+                        <div t-attf-class="#{!selection_mode ? kanban_color(record.color.raw_value) : ''}">
+                            <div t-attf-class="o_kanban_card_header">
+                                <div class="o_kanban_card_header_title">
+                                    <div class="o_primary">
+                                        <a name="1009" type="action" context="{'search_default_presales_team': id}">
+                                            <field name="name"/>
+                                        </a></div>
+                                </div>
+                            </div>
+                            <div class="container o_kanban_card_content">
+                                <div class="row">
+                                    <div class="col-6 o_kanban_primary_left">
+                                        <button class="btn btn-primary" name="1009" type="action" context="{'search_default_presales_team': id}">
+                                            <t t-esc="record.project_count.value"/> Project
+                                        </button>
+                                    </div>
+                                    <div class="col-6 o_kanban_primary_right">
+                                        <div t-if="record.project_progress.raw_value &gt; 0">
+                                            <a name="1009" type="action">
+                                            <t t-esc="record.project_progress.value"/>
+                                            In Progress
+                                            </a>
+                                        </div>
+                                        <div t-if="record.project_win.raw_value &gt; 0">
+                                            <a name="1009" type="action">
+                                            <t t-esc="record.project_win.value"/>
+                                            Win
+                                            </a>
+                                        </div>
+                                        <div t-if="record.project_lose.raw_value &gt; 0">
+                                            <a name="1009" type="action">
+                                            <t t-esc="record.project_lose.value"/>
+                                            Lose
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="presales_team_view_tree" model="ir.ui.view">
+        <field name="name">crm.presales.team.tree</field>
+        <field name="model">crm.presales.team</field>
+        <field name="arch" type="xml">
+            <tree string="Presales Team" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="presales_dashboard_action" model="ir.actions.act_window">
+        <field name="name">Presales Dashboard</field>
+        <field name="res_model">crm.presales.team</field>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="presales_team_kanban"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Dashboard of Presales
+          </p>
+        </field>
+    </record>
+	
+	<record id="presales_team_action" model="ir.actions.act_window">
+        <field name="name">Presales Team</field>
+        <field name="res_model">crm.presales.team</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="presales_team_view_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Team of Presales
+          </p>
+        </field>
+    </record>
+	
+	   <!-- activity.type : views -->
+	
+	<record id="activity_type_tree" model="ir.ui.view">
+        <field name="name">activity.type.tree</field>
+        <field name="model">crm.activity.type</field>
+        <field name="arch" type="xml">
+            <tree string="Activity Type" editable="top">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+				<field name="short_name"/>
+				<field name="used_in_jasa"/>
+				<field name="need_presales_report"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="activity_type_action" model="ir.actions.act_window">
+        <field name="name">Activity Type</field>
+        <field name="res_model">crm.activity.type</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="activity_type_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Activity Type
+          </p>
+        </field>
+    </record>
+	
+	   <!-- skill category -->
+	
+	<record id="skill_category_view_tree" model="ir.ui.view">
+        <field name="name">skill.category.tree</field>
+        <field name="model">crm.skill.category</field>
+        <field name="arch" type="xml">
+            <tree string="Skill Category" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="sub_cat" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="skill_category_action" model="ir.actions.act_window">
+        <field name="name">Skill Category</field>
+        <field name="res_model">crm.skill.category</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="skill_category_view_tree"/>
+    </record>	
+
+	   <!-- presales review -->
+	   
+	<record id="presales_review_view_form" model="ir.ui.view">
+        <field name="name">presales.review.form</field>
+        <field name="model">crm.presales.review</field>
+        <field name="arch" type="xml">
+            <form string="Presales Review Form">
+                <separator string="Your Review is Valuable to Us"/>
+                <sheet>
+                    <group>
+                           <field name="no_ppc" readonly="True" invisible="True"/>
+                           <field name="name" readonly="True" invisible="True"/>
+				           <field name="create_date" readonly="True" invisible="True"/>
+				           <field name="rating" widget="priority"/>
+                           <field name="comment" class="w-100"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Submit" name="action_submit" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" class="oe_link" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+	
+	<record id="presales_review_view_tree" model="ir.ui.view">
+        <field name="name">presales.review.tree</field>
+        <field name="model">crm.presales.review</field>
+        <field name="arch" type="xml">
+            <tree string="Review Record">
+                <field name="writer"/>
+                <field name="create_date"/>
+                <field name="name"/>
+                <field name="no_ppc"/>
+                <field name="rating" widget="priority" readonly="True"/>
+                <field name="comment"/>
+            </tree>
+        </field>
+    </record>
+	
+	
+	<record id="presales_review_wizard_action" model="ir.actions.act_window">
+        <field name="name">Presales Review</field>
+        <field name="res_model">crm.presales.review</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="presales_review_view_form"/>
+        <field name="target">new</field>
+		<field name="context">{
+            'default_no_ppc': active_id
+        }</field>
+    </record>
+	
+	<record id="presales_review_record_action" model="ir.actions.act_window">
+        <field name="name">Review Record</field>
+        <field name="res_model">crm.presales.review</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="presales_review_view_tree"/>
+    </record>	  
+	
+	   <!-- presales.activity : views -->
+	
+	<record id="presales_activity_tree" model="ir.ui.view">
+        <field name="name">presales.activity.tree</field>
+        <field name="model">crm.presales.activity</field>
+        <field name="arch" type="xml">
+            <tree string="Presales Activity" editable="top">
+                <field name="name"/>
+				<field name="activity"/>
+				<field name="date"/>
+				<field name="no_ppc"/>
+				<field name="sales"/>
+				<field name="user"/>
+				<field name="contact_person"/>
+				<field name="job_title" optional="hide"/>
+				<field name="phone" optional="hide"/>
+				<field name="detail"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="presales_activity_view_calendar" model="ir.ui.view">
+        <field name="name">presales.activity.calendar</field>
+        <field name="model">crm.presales.activity</field>
+        <field name="arch" type="xml">
+            <calendar date_start="date" date_delay="duration" color="name" create="0" delete="0">
+                <field name="name" filters="1"/>
+				<field name="activity" filters="1"/>
+				<field name="user"/>
+				<field name="sales"/>
+				<field name="detail"/>
+            </calendar>
+        </field>
+    </record>
+	
+	<record id="presales_activity_view_form" model="ir.ui.view">
+        <field name="name">presales.activity.form</field>
+        <field name="model">crm.presales.activity</field>
+        <field name="arch" type="xml">
+            <form string="Activity Record">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Presales"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+							<field name="activity"/>
+							<field name="date"/>
+							<field name="sales"/>
+							<field name="no_ppc"/>
+							<field name="user" domain="[('commercial_company_name', '!=', False)]"/>
+							<field name="contact_person" domain="[('commercial_company_name', '!=', False), ('parent_id', '!=', False)]"/>
+							<field name="job_title"/>
+							<field name="phone"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+	
+	<record id="presales_activity_action" model="ir.actions.act_window">
+        <field name="name">Presales Activity</field>
+        <field name="res_model">crm.presales.activity</field>
+        <field name="view_mode">tree,calendar,form</field>
+        <field name="view_id" ref="presales_activity_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Presales Activity
+          </p>
+        </field>
+    </record>	
+
+	   <!-- menu item -->
+
+    <menuitem
+        id="menu_presales_dashboard_title"
+        name="Presales Dashboard"
+        web_icon="maintenance,static/description/icon.png"
+        sequence="161"/>
+
+    <menuitem
+        id="menu_presales_dashboard"
+        name="Dashboard"
+        parent="menu_presales_dashboard_title"
+        groups="group_presales"
+        action="presales_dashboard_action"
+        sequence="0"/>
+		
+	<menuitem
+        id="menu_presales_activity"
+        name="Activity"
+        parent="menu_presales_dashboard_title"
+        groups="group_presales_admin,group_presales"
+        action="presales_activity_action"
+        sequence="2"/>
+		
+	<menuitem
+        id="menu_configuration"
+        name="Configuration"
+        parent="menu_presales_dashboard_title"
+        groups="group_presales_admin"
+        sequence="20"/>
+	<menuitem
+        id="menu_presales_team"
+        name="Team"
+        parent="menu_configuration"
+        groups="group_presales_admin"
+        action="presales_team_action"
+        sequence="1"/>
+	<menuitem
+        id="menu_activity_type"
+        name="Activity Type"
+        parent="menu_configuration"
+        groups="group_presales_admin"
+        action="activity_type_action"
+        sequence="2"/>
+	<menuitem
+        id="menu_skill_category"
+        name="Skill Category"
+        parent="menu_configuration"
+        groups="group_presales_admin"
+        action="skill_category_action"
+        sequence="3"/>
+	<menuitem
+        id="menu_review_record"
+        name="Review Record"
+        parent="menu_configuration"
+        groups="group_presales_admin"
+        action="presales_review_record_action"
+        sequence="4"/>
+	
+</odoo>

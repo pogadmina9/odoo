@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+		<!-- CRM Lead Inherit -->
+
+	<record id="crm_lead_inh_form" model="ir.ui.view">
+        <field name="name">crm.lead.inh.form</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//field[@name='cp_phone']" position="after">
+                    <field name="total_demo_duration" readonly="True" invisible="True"/>
+                    <field name="last_time_tracking_id" readonly="True" invisible="True"/>
+                </xpath>
+				<xpath expr="//field[@name='contract_amount']" position="after">
+                    <field name="won_quarter_id" invisible="stage_id not in [4]"/>
+                    <field name="kpi_id" invisible="True"/>
+                </xpath>
+				<xpath expr="//notebook/page[@name='internal_notes']" position="before">
+                    <page string="Time Tracking" invisible="True">
+                            <field name="time_tracking_ids" readonly="True">
+                            <tree>
+                                <field name="name"/>
+                                <field name="stage_id"/>
+                                <field name="date_start"/>
+                                <field name="date_end"/>
+                                <field name="time_consumed"/>
+                            </tree>
+                            </field>
+                            <div class="clearfix"/>
+                        </page>
+                </xpath>
+            </data>
+        </field>
+    </record>
+	
+		<!-- PJ Inherit -->
+
+	<record id="pj_request_inh_form" model="ir.ui.view">
+        <field name="name">pj.request.inh.form</field>
+        <field name="model">pengajuan.jasa</field>
+        <field name="inherit_id" ref="maintenance.pj_request_view_form"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//button[@name='urgent_action']" position="after">
+					<button string="Submit Report" name="do_submit_report" type="object" invisible="not current_presales or stage_pj_id not in [9]"/>
+                    <button string="Write Review" name="write_review" type="object" invisible="stage_pj_id not in [10] or is_reviewed or uid not in [sales] or not presales"/>
+                    <button string="Create Similar Request" name="create_copy" type="object" invisible="uid not in [sales] and uid not in [create_uid]"/>
+				</xpath>
+                <xpath expr="//field[@name='teknisi']" position="after">
+					<field name="schedule_date" string="Schedule Date" required="not allday" readonly="readonly in [True]" placeholder="Jadwal Tiba di Lokasi" widget="daterange" options="{'end_date_field': 'schedule_end'}" invisible="allday"/>
+                    <field name="start_date" required="allday" readonly="readonly in [True]" widget="daterange" options="{'end_date_field': 'stop_date'}" invisible="not allday"/>
+                    <field name="allday" widget="boolean_toggle"/>
+				</xpath>
+				<xpath expr="//field[@name='job_description']" position="after">
+                    <field name="kpi_id" invisible="True"/>
+                    <field name="is_reviewed" invisible="True"/>
+                    <field name="current_presales" invisible="True"/>
+                    <field name="stop_date" invisible="True"/>
+                    <field name="schedule_end" invisible="True"/>
+                    <field name="create_uid" invisible="True"/>
+                </xpath>
+            </data>
+        </field>
+    </record>
+	
+		<!-- Presales Activity -->
+			
+	<record id="presales_activity_view_search" model="ir.ui.view">
+        <field name="name">presales.activity.search</field>
+        <field name="model">crm.presales.activity</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field string="Presales" name="name"/>
+                <field string="Activity" name="activity"/>
+                <field string="Detail Activity" name="detail"/>
+                <field string="Sales" name="sales"/>
+                <field string="Instansi" name="user"/>
+                <field string="Request ID" name="request_id"/>
+                <filter string="Date" name="date" date="date"/>
+            </search>
+        </field>
+    </record>
+	
+			<!-- Pivot -->
+			
+	<record id="presales_activity_view_pivot" model="ir.ui.view">
+		<field name="name">presales.activity.report.pivot</field>
+        <field name="model">crm.presales.activity</field>
+        <field name="priority">60</field>
+        <field name="arch" type="xml">
+			<pivot string="Presales Activity Report" sample="1">
+				<field name="name" type="col"/>
+                <field name="activity" type="row"/>
+            </pivot>
+        </field>
+	</record>
+	
+			<!-- Presales Review -->
+
+	<record id="review_presales_form" model="ir.ui.view">
+        <field name="name">review.presales.form</field>
+        <field name="model">review.presales</field>
+        <field name="arch" type="xml">
+            <form string="Presales Review Form">
+                <separator string="Your Review is Valuable to Us"/>
+                <sheet>
+                    <group>
+                           <field name="request_id" readonly="True" invisible="True"/>
+                           <field name="name" readonly="True" invisible="True"/>
+				           <field name="create_date" readonly="True" invisible="True"/>
+				           <field name="kpi_id" invisible="True"/>
+				           <field name="rating" widget="priority"/>
+                           <field name="comment" class="w-100"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Submit" name="action_submit" type="object" class="oe_highlight" data-hotkey="q"/>
+                    <button string="Cancel" class="oe_link" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+	
+	<record id="review_presales_tree" model="ir.ui.view">
+        <field name="name">review.presales.tree</field>
+        <field name="model">review.presales</field>
+        <field name="arch" type="xml">
+            <tree string="Review Record" duplicate="0">
+                <field name="writer"/>
+                <field name="create_date"/>
+                <field name="name"/>
+                <field name="request_id"/>
+                <field name="rating" widget="priority" readonly="True"/>
+                <field name="comment"/>
+            </tree>
+        </field>
+    </record>
+	
+				
+	<record id="for_presales_review_view_tree" model="ir.ui.view">
+        <field name="name">review.presales.tree</field>
+        <field name="model">review.presales</field>
+        <field name="arch" type="xml">
+            <tree string="Review Record" create="0">
+                <field name="writer" column_invisible="True"/>
+                <field name="create_date"/>
+                <field name="name"/>
+                <field name="request_id" column_invisible="True"/>
+                <field name="rating" widget="priority" readonly="True"/>
+                <field name="comment"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="for_presales_kpi_action" model="ir.actions.act_window">
+        <field name="name">Presales Review</field>
+        <field name="res_model">review.presales</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="for_presales_review_view_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Presales Review
+          </p>
+        </field>
+    </record>
+	
+	
+	<record id="review_presales_wizard_action" model="ir.actions.act_window">
+        <field name="name">Presales Review</field>
+        <field name="res_model">review.presales</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="review_presales_form"/>
+        <field name="target">new</field>
+		<field name="context">{
+            'default_request_id': active_id
+        }</field>
+    </record>
+	
+	<record id="review_presales_record_action" model="ir.actions.act_window">
+        <field name="name">Review Record</field>
+        <field name="res_model">review.presales</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="review_presales_tree"/>
+    </record>
+	
+    	   <!-- Quarter -->
+	
+	<record id="quarter_tree" model="ir.ui.view">
+        <field name="name">quarter.tree</field>
+        <field name="model">quarter</field>
+        <field name="arch" type="xml">
+            <tree string="Quarter" duplicate="0">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="quarter_form" model="ir.ui.view">
+        <field name="name">quarter.form</field>
+        <field name="model">quarter</field>
+        <field name="arch" type="xml">
+            <form string="Quarter Details" duplicate="0">
+                <sheet>
+                    <div class="oe_title">                        
+                        <h1>
+                            <field name="name" readonly="True" forcesave="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="currency_id" invisible="True"/>						
+                        <group>
+                            <separator string="IBT Revenue Configuration"/>
+                            <field name="target_revenue_type" widget="selection"/>
+                            <field name="target_revenue_sales" string="Sales Target" invisible="target_revenue_type in ['individual']"/>
+                            <label for="target_revenue_point" string="Presales Target" invisible="target_revenue_type in ['individual']"/>
+                            <div invisible="target_revenue_type in ['individual']">
+                                <field name="target_revenue_point" widget="percentage" class="oe_inline"/> = <field name="target_revenue_presales" class="oe_inline"/>
+                            </div>
+                            <field name="revenue_kpi_weight" class="oe_inline" widget="percentage" string="KPI Weight" invisible="target_revenue_type in ['individual']"/>
+                        </group>
+						<group>
+						    <separator string="IBB Revenue Configuration"/>
+                            <field name="target_revenue_type_ibb" widget="selection"/>
+                            <field name="target_revenue_sales_ibb" string="Sales Target" invisible="target_revenue_type_ibb in ['individual']"/>
+                            <label for="target_revenue_point_ibb" string="Presales Target" invisible="target_revenue_type_ibb in ['individual']"/>
+                            <div invisible="target_revenue_type_ibb in ['individual']">
+                                <field name="target_revenue_point_ibb" widget="percentage" class="oe_inline"/> = <field name="target_revenue_presales_ibb" class="oe_inline"/>
+                            </div>
+                            <field name="revenue_kpi_weight_ibb" class="oe_inline" widget="percentage" string="KPI Weight" invisible="target_revenue_type_ibb in ['individual']"/>                         
+                        </group>
+                        <group>
+						<separator string="Total KPI Percentage"/>
+						    <label for="total_kpi_percentage" string="Total KPI Percentage"/>
+                            <div>
+                                <field name="total_kpi_percentage" widget="percentage"/>
+                            </div>
+                        </group>
+                        <notebook>
+                            <page string="Other KPI Parameter">
+                            <field name="kpi_parameter_ids">
+                            <tree editable="bottom">
+                                <field name="sequence" column_invisible="True"/>
+                                <field name="name" options="{'no_create': True}"/>
+                                <field name="target"/>
+                                <field name="percentage" widget="percentage"/>								
+                                <field name="weight" widget="percentage"/>
+                            </tree>
+                            </field>
+                            <div class="clearfix"/>
+                        </page>
+                        <page string="Individual Target Configuration" invisible="target_revenue_type_ibb in ['team'] and target_revenue_type in ['team']">
+                            <field name="presales_kpi_ids">
+                            <tree editable="bottom">
+                                <field name="name"/>
+                                <field name="target_revenue"/>
+                                <field name="revenue_kpi_weight" widget="percentage"/>								
+                                <field name="currency_id" column_invisible="True"/>
+                            </tree>
+                            </field>
+                            <div class="clearfix"/>
+                        </page>
+                        </notebook>
+                    </group>
+				</sheet>
+            </form>
+        </field>
+    </record>
+	
+	<record id="quarter_action" model="ir.actions.act_window">
+        <field name="name">Quarter</field>
+        <field name="res_model">quarter</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="quarter_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Quarter
+          </p>
+        </field>
+    </record>
+		   
+    	   <!-- KPI Presales -->
+
+	<record id="presales_kpi_search" model="ir.ui.view">
+        <field name="name">presales.kpi.search</field>
+        <field name="model">presales.kpi</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field string="Presales" name="presales"/>
+                <field string="Quarter" name="quarter"/>
+            </search>
+        </field>
+    </record>
+
+	<record id="presales_kpi_tree" model="ir.ui.view">
+        <field name="name">presales.kpi.tree</field>
+        <field name="model">presales.kpi</field>
+        <field name="arch" type="xml">
+            <tree string="Presales KPI" duplicate="0">
+                <field name="name"/>
+				<field name="total_kpi" widget="percentage"/>
+            </tree>
+        </field>
+    </record>
+	
+	<record id="presales_kpi_form" model="ir.ui.view">
+        <field name="name">presales.kpi.form</field>
+        <field name="model">presales.kpi</field>
+        <field name="arch" type="xml">
+            <form string="KPI Details" duplicate="0">
+                <sheet>
+                    <div class="oe_title">                        
+                        <h1>
+                            <field name="name" readonly="1" forcesave="1"/>
+                        </h1>
+                    </div>
+                    <group>
+						<field name="currency_id" invisible="True"/>
+                        <group>
+                            <field name="presales" readonly="1" options="{'no_open': True}"/>
+                            <field name="quarter" readonly="1"/>
+                            <field name="total_kpi" widget="percentage"/>                            
+                        </group>
+						<group>
+						    <label for="total_revenue" string="Total Revenue"/>
+                            <div>
+                                <field name="total_revenue" class="oe_inline"/> = <field name="total_revenue_kpi" widget="percentage" class="oe_inline"/>
+                            </div>
+                            <label for="total_poc_presentation" string="Total POC &amp; Presentation"/>
+                            <div>
+                                <field name="total_poc_presentation" class="oe_inline"/> = <field name="total_poc_presentation_kpi" widget="percentage" class="oe_inline"/>
+                            </div>
+                            <label for="conversion_poc_presentation" string="Conversion of POC &amp; Presentation"/>
+                            <div>
+                                <field name="conversion_poc_presentation" class="oe_inline"/> = <field name="conversion_poc_presentation_kpi" widget="percentage" class="oe_inline"/>
+                            </div>      
+                            <label for="total_certification" string="Training &amp; Certification"/>
+                            <div>
+                                <field name="total_certification" class="oe_inline"/> = <field name="total_certification_kpi" widget="percentage" class="oe_inline"/>
+                            </div>        
+                            <label for="total_solution" string="Create New Solution"/>
+                            <div>
+                                <field name="total_solution" class="oe_inline"/> = <field name="total_solution_kpi" widget="percentage" class="oe_inline"/>
+                            </div>
+                            <label for="sales_feedback" string="Feedback Rating from Sales"/>
+                            <div>
+                                <field name="sales_feedback" class="oe_inline"/> = <field name="sales_feedback_kpi" widget="percentage" class="oe_inline"/>
+                            </div>               
+                        </group>
+                    </group>
+					<notebook>
+                    <page string="Project Won">
+                            <field name="crm_ids" readonly="1">
+                            <tree>
+                                <field name="name" string="Project Name"/>
+                                <field name="no_ppc"/>
+                                <field name="contract_amount"/>
+                                <field name="company_currency" column_invisible="True"/>
+                                <field name="partner_id"/>
+                                <field name="user_id"/>
+                            </tree>
+                            </field>
+                            <div class="clearfix"/>
+                    </page>
+					<page string="Demo / Presentation">
+                            <field name="pj_ids" readonly="1">
+                            <tree>
+                                <field name="name" string="Request ID"/>
+								<field name="activity_type"/>
+                                <field name="schedule_date"/>
+                                <field name="stage_pj_id"/>
+                                <field name="partner"/>
+                                <field name="sales"/>
+								<field name="no_ppc"/>
+								<field name="job_description"/>
+                            </tree>
+                            </field>
+                            <div class="clearfix"/>
+                    </page>
+					<page string="Training &amp; Certification">
+                            <field name="training_ids" readonly="1">
+                            <tree>
+                                <field name="subject"/>
+                                <field name="type"/>
+                                <field name="brand"/>
+                                <field name="category"/>
+                                <field name="issued_date"/>
+                                <field name="exp_date"/>
+                            </tree>
+                            </field>
+                            <div class="clearfix"/>
+                    </page>
+					<page string="Solutions Created">
+                            <field name="solutions_list_ids" readonly="1">
+                            <tree>
+                                <field name="name" string="Title"/>
+                                <field name="approve_date" string="Publish Date"/>
+                                <field name="industry" widget="many2many_tags"/>
+                            </tree>
+                            </field>
+                            <div class="clearfix"/>
+                    </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>                
+            </form>
+        </field>
+    </record>
+	
+	<record id="presales_kpi_action" model="ir.actions.act_window">
+        <field name="name">Presales KPI</field>
+        <field name="res_model">presales.kpi</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="presales_kpi_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Presales KPI
+          </p>
+        </field>
+    </record>
+	
+			<!-- Menu Inherit -->
+			
+	<menuitem
+        id="menu_presales_kpi"
+        name="KPI"
+        parent="crm.menu_presales_dashboard_title"
+        groups="crm.group_presales_admin,crm.group_presales"
+        action="presales_kpi_action"
+        sequence="1"/>
+		
+	<menuitem
+        id="menu_presales_review"
+        name="Review"
+        parent="crm.menu_presales_dashboard_title"
+        groups="crm.group_presales_admin,crm.group_presales"
+        action="for_presales_kpi_action"
+        sequence="3"/>
+		
+	<menuitem
+        id="menu_review_record"
+        name="Review Records"
+        parent="crm.menu_configuration"
+        groups="crm.group_presales_admin"
+        action="review_presales_record_action"
+        sequence="4"/>
+	
+	<menuitem
+        id="quarter_configuration"
+        name="Quarter"
+        parent="crm.menu_configuration"
+        groups="crm.group_presales_admin,crm.group_presales"
+        action="quarter_action"
+        sequence="7"/>
+	
+</odoo>

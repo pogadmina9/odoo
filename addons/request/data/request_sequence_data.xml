@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="seq_task" model="ir.sequence">
+            <field name="name">Task Sequence</field>
+            <field name="code">req.task.seq</field>
+            <field name="prefix">TASK/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+		<record id="seq_todo_task" model="ir.sequence">
+            <field name="name">Todo Sequence</field>
+            <field name="code">todo.seq</field>
+            <field name="prefix">TODO/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+		<record id="seq_purchase_controller" model="ir.sequence">
+            <field name="name">Purchase Order Controller</field>
+            <field name="code">req.purchasing.seq</field>
+            <field name="prefix">CPO/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+		<record id="seq_delegate_task" model="ir.sequence">
+            <field name="name">Delegate Task Sequence</field>
+            <field name="code">delegate.task.seq</field>
+            <field name="prefix">DLG/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+		<record id="seq_internal_it" model="ir.sequence">
+            <field name="name">Internal IT Sequence</field>
+            <field name="code">internal.it.seq</field>
+            <field name="prefix">REQ-IT/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+		<record id="seq_transport_ops" model="ir.sequence">
+            <field name="name">Transport Ops Sequence</field>
+            <field name="code">transport.ops.seq</field>
+            <field name="prefix">REQ-CAR/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+		<record id="seq_transport_pick" model="ir.sequence">
+            <field name="name">Transport Pickup Sequence</field>
+            <field name="code">transport.ops.pick</field>
+            <field name="prefix">REQ-PICK/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+		<record id="seq_transport_dlv" model="ir.sequence">
+            <field name="name">Transport Delivery Sequence</field>
+            <field name="code">transport.ops.dlv</field>
+            <field name="prefix">REQ-DLV/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+		<record id="seq_transport_txn" model="ir.sequence">
+            <field name="name">Transport TXN Sequence</field>
+            <field name="code">transport.ops.txn</field>
+            <field name="prefix">REQ-TXN/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+		
+		<record id="delete_attachment" model="mail.message.subtype">
+            <field name="name">Attachment Deleted</field>
+            <field name="res_model">req.task</field>
+            <field name="description">Attachment Deleted</field>
+            <field name="default" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

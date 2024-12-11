@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+   	   <!-- Approval Config -->
+
+	<record id="req_approval_config_form" model="ir.ui.view">
+        <field name="name">req.approval.config.form</field>
+        <field name="model">req.approval.config</field>
+        <field name="arch" type="xml">
+            <form string="Request Approval Configuration">
+                <sheet>
+				    <group>
+                        <group>
+							<separator string="Operational Car"/>
+                            <field name="approver_ops_car" widget="many2many_tags" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="mail_ops_car" widget="many2many_tags" options="{'no_create': True, 'no_open': True}"/>
+						</group>
+						<group>
+						</group>
+                    </group>              
+                </sheet>          
+            </form>
+        </field>
+    </record> 	   
+	
+	<record id="req_approval_config_form_action" model="ir.actions.act_window">
+        <field name="name">Request Approval Config</field>
+        <field name="res_model">req.approval.config</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="req_approval_config_form"/>
+		<field name="res_id" ref="request.req_approval_config1"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add New Config Now
+          </p>
+        </field>
+    </record>
+	
+   	   <!-- Team Config -->
+
+	<record id="req_team_config_form" model="ir.ui.view">
+        <field name="name">req.team.config.form</field>
+        <field name="model">req.team.config</field>
+        <field name="arch" type="xml">
+            <form string="Request Team Configuration">
+                <sheet>
+				    <group>
+                        <group>
+							<separator string="Internal IT Request" invisible="uid not in [admin_internal_it,7,145]"/>
+                            <field name="admin_internal_it" widget="many2many_tags" options="{'no_create': True, 'no_open': True}" required="True" invisible="uid not in [admin_internal_it,7,145]"/>
+                            <field name="internal_it_team" widget="many2many_tags" options="{'no_create': True, 'no_open': True}" invisible="uid not in [admin_internal_it,7,145]"/>
+							<separator string="Transportation Request" invisible="uid not in [admin_transport,7]"/>
+                            <field name="admin_transport" widget="many2many_tags" options="{'no_create': True, 'no_open': True}" required="True" invisible="uid not in [admin_transport,7]"/>
+                            <field name="transport_team" widget="many2many_tags" options="{'no_create': True, 'no_open': True}" invisible="uid not in [admin_transport,7]"/>
+							<separator string="Manpower Request" invisible="uid not in [admin_mpr,7]"/>
+                            <field name="admin_mpr" widget="many2many_tags" options="{'no_create': True, 'no_open': True}" required="True" invisible="uid not in [admin_mpr,7]"/>
+                            <field name="mpr_team" widget="many2many_tags" options="{'no_create': True, 'no_open': True}" invisible="uid not in [admin_mpr,7]"/>
+						</group>
+						<group>
+						</group>
+                    </group>              
+                </sheet>          
+            </form>
+        </field>
+    </record> 	   
+	
+	<record id="req_team_config_form_action" model="ir.actions.act_window">
+        <field name="name">Request Team Config</field>
+        <field name="res_model">req.team.config</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="req_team_config_form"/>
+		<field name="res_id" ref="request.req_team_config1"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add New Config Now
+          </p>
+        </field>
+    </record>
+	
+			<!-- Menu Inherit -->
+			
+	<menuitem
+        id="menu_req_approval_config"
+        name="Approval"
+        parent="maintenance.menu_maintenance_configuration"
+        groups="base.group_system"
+        action="req_approval_config_form_action"
+        sequence="1"/>
+	<menuitem
+        id="menu_req_team_config"
+        name="Team"
+        parent="maintenance.menu_maintenance_configuration"
+        groups="base.group_system"
+        action="req_team_config_form_action"
+        sequence="1"/>
+	
+</odoo>

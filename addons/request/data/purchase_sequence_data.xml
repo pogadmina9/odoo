@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="seq_purchase_controller" model="ir.sequence">
+            <field name="name">Purchase Order Controller</field>
+            <field name="code">req.purchasing.seq</field>
+            <field name="prefix">CPO/%(y)s%(month)s%(day)s/</field>
+            <field name="padding">3</field>
+        </record>
+
+    </data>
+</odoo>
