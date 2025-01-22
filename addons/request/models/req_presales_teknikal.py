@@ -29,6 +29,10 @@ from odoo.addons.resource.models.utils import filter_domain_leaf
         
 class PengajuanJasa(models.Model):
     _inherit = 'pengajuan.jasa'
+    
+    report_date = fields.Datetime('Report Date', tracking=True)
+    close_date = fields.Datetime('Close Date', tracking=True)
+    attachment_ids = fields.One2many('ir.attachment', 'res_id', string="Attachments")
 
     def teknikal_schedule_today(self):
         return {
