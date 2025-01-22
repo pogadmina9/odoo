@@ -82,13 +82,13 @@ class PresalesKpiReport(models.Model):
                 sheet.write(row, 2, obj.total_certification, border)            
                 sheet.write(row, 3, obj.total_certification_kpi, percentage)
                 row +=1
-            if self.env['kpi.parameter'].search([('name', 'ilike', 'Solution'), ('quarter_id.id', '=', obj.quarter.id)]):
-                sheet.write(row, 2, obj.total_solution, border)            
-                sheet.write(row, 3, obj.total_solution_kpi, percentage)
-                row +=1
             if self.env['kpi.parameter'].search([('name', 'ilike', 'Rating'), ('quarter_id.id', '=', obj.quarter.id)]):
                 sheet.write(row, 2, obj.sales_feedback, number_2)            
                 sheet.write(row, 3, obj.sales_feedback_kpi, percentage)
+                row +=1
+            if self.env['kpi.parameter'].search([('name', 'ilike', 'Solution'), ('quarter_id.id', '=', obj.quarter.id)]):
+                sheet.write(row, 2, obj.total_solution, border)            
+                sheet.write(row, 3, obj.total_solution_kpi, percentage)
                 row +=1
             sheet.write(row, 2, 'Total', bold_ylw)
             sheet.write(row, 3, obj.total_kpi, percentage_ylw)

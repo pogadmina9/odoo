@@ -17,7 +17,7 @@ from odoo.addons.iap.tools import iap_tools
 from odoo.addons.mail.tools import mail_validation
 from odoo.fields import Command
 from odoo.addons.phone_validation.tools import phone_validation
-from odoo.exceptions import UserError, AccessError
+from odoo.exceptions import UserError, AccessError, ValidationError
 from odoo.osv import expression
 from odoo.tools.translate import _
 from odoo.tools import date_utils, email_split, is_html_empty, groupby, parse_contact_from_email
@@ -109,7 +109,7 @@ class ReqTask(models.Model):
     pending_approver1 = fields.Char(string='Pending Approver 1')
     pending_approver2 = fields.Char(string='Pending Approver 2')
     req_detail = fields.Text(string='Request Detail')
-    notes = fields.Html(string='Progress Notes')
+    notes = fields.Text(string='Progress Notes', tracking=True)
     priority = fields.Selection([('0', 'Low'), ('1', 'Normal'), ('2', 'Medium'), ('3', 'High')], default='1', tracking=True)
     urgent_note = fields.Char(tracking=True)
     deadline = fields.Datetime(string='Deadline', tracking=True)
@@ -145,6 +145,14 @@ class ReqTask(models.Model):
     pic_upline_mail = fields.Char(string='PIC Upline Mail', store=True, compute='_compute_pic_upline_mail')
     is_new_mail = fields.Boolean(string='New Mail', default=False)
     
+    @api.constrains('deadline')
+    def check_deadline(self):
+        now = fields.Datetime.now()
+        if self.deadline:
+            if self.deadline < now:
+                raise ValidationError(
+                    _("Deadline tidak bisa diisi dengan waktu lampau!"))
+    
     def save(self):
         self.write({'dummy_save': True})        
         
@@ -173,7 +181,8 @@ class ReqTask(models.Model):
         
     def finish(self):
         self.write({'status_id': 6, 'finish_date': datetime.now(), 'reopen_reason': False})
-        self.create_finished_task_mail()
+        if self.type == 'task':
+            self.create_finished_task_mail()
 
     def reopen(self):
         self.write({'status_id': 4, 'finish_date': False})
@@ -181,7 +190,8 @@ class ReqTask(models.Model):
 
     def closed(self):
         self.write({'status_id': 7, 'closed_date': datetime.now()})
-        self.create_closed_task_mail()
+        if self.type == 'task':
+            self.create_closed_task_mail()
     
     def _submit_delegate(self):
         self.write({'status_id': 5, 'is_new_mail': 0})
@@ -195,15 +205,15 @@ class ReqTask(models.Model):
         
     def _list_email_pending_approver(self):
         self.ensure_one()
-        return ", ".join([e for e in self.pending_approver.mapped("work_email") if e])
+        return "; ".join([e for e in self.pending_approver.mapped("work_email") if e])
     
     def _list_email_assignee_upline(self):
         self.ensure_one()
-        return ", ".join([e for e in self.pic_upline.mapped("work_email") if e])
+        return "; ".join([e for e in self.pic_upline.mapped("work_email") if e])
     
     def _list_email_requester_upline(self):
         self.ensure_one()
-        return ", ".join([e for e in self.requester_upline.mapped("work_email") if e])
+        return "; ".join([e for e in self.requester_upline.mapped("work_email") if e])
         
     def _compute_current_user(self):
         self.current_user = self.env.uid
@@ -265,7 +275,8 @@ class ReqTask(models.Model):
         res = super(ReqTask, self).write(vals)
         if vals.get('deadline'):
             self._cron_overdue()
-        
+
+    
     @api.onchange('pic')
     def _auto_pic_department(self):
         manager1 = self.pic.employee_id.manager_id.id
@@ -657,42 +668,42 @@ class DelegateList(models.Model):
             manager = list_manager.mapped("id")
             if self.create_uid.employee_id.id == self.new_pic.employee_id.department_id.manager_id.id:
                 self.write({'status_id': 3, 'closed_date': datetime.now()})
-                self.accept_delegation()
+                self.sudo().accept_delegation()
                 
             elif self.create_uid.employee_id.id == self.new_pic.employee_id.department_id.gm_id.id:
                 self.write({'status_id': 3, 'closed_date': datetime.now()})
-                self.accept_delegation()
+                self.sudo().accept_delegation()
                 
             elif self.create_uid.employee_id.id == self.new_pic.employee_id.parent_id.id:
                 self.write({'status_id': 3, 'closed_date': datetime.now()})
-                self.accept_delegation()
+                self.sudo().accept_delegation()
                 
             elif self.create_uid.employee_id.id == self.new_pic.employee_id.manager_id.id:
                 self.write({'status_id': 3, 'closed_date': datetime.now()})
-                self.accept_delegation()
+                self.sudo().accept_delegation()
                 
             elif self.new_pic.employee_id.id == self.old_pic.employee_id.department_id.manager_id.id:
                 self.write({'status_id': 3, 'closed_date': datetime.now()})
-                self.accept_delegation()
+                self.sudo().accept_delegation()
                 
             elif self.new_pic.employee_id.id == self.old_pic.employee_id.department_id.gm_id.parent_id.id:
                 self.write({'status_id': 3, 'closed_date': datetime.now()})
-                self.accept_delegation()
+                self.sudo().accept_delegation()
                 
             elif self.new_pic.employee_id.id == self.old_pic.employee_id.department_id.gm_id.id:
                 self.write({'status_id': 3, 'closed_date': datetime.now()})
-                self.accept_delegation()
+                self.sudo().accept_delegation()
                 
             elif self.new_pic.employee_id.id == self.old_pic.employee_id.parent_id.id:
                 self.write({'status_id': 3, 'closed_date': datetime.now()})
-                self.accept_delegation()
+                self.sudo().accept_delegation()
                 
             elif self.new_pic.employee_id.id == self.old_pic.employee_id.manager_id.id:
                 self.write({'status_id': 3, 'closed_date': datetime.now()})
-                self.accept_delegation()
+                self.sudo().accept_delegation()
                 
             else:
-                self.task_request_id._submit_delegate()
+                self.sudo().task_request_id._submit_delegate()
                 return {'type': 'ir.actions.act_window_close'}
         
     def approve(self):

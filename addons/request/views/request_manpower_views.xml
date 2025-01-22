@@ -56,7 +56,7 @@
         <field name="name">req.manpower.tree</field>
         <field name="model">req.manpower</field>
         <field name="arch" type="xml">
-            <tree string="Manpower Request" delete="0">
+            <tree string="Manpower Request" delete="0" duplicate="0">
                 <field name="name" string="Request ID"/>
                 <field name="status_id"/>
                 <field name="requester" optional="show"/>
@@ -151,6 +151,7 @@
                         <group>
                             <field name="cancel_reason" readonly="True" invisible="not cancel_reason"/>
                             <field name="submit_date" readonly="True" invisible="not submit_date"/>
+							<field name="approve_date" readonly="True" invisible="not approve_date" force_save="1"/>
                             <field name="requester" readonly="True" options="{'no_create': True, 'no_open': True}"/>
                             <field name="requester_job" options="{'no_create': True, 'no_open': True}"/>
                             <field name="requester_department" options="{'no_create': True, 'no_open': True}"/>
@@ -175,11 +176,20 @@
                         </group>
 						<group>
 						    <separator string="Qualification of Candidate"/>
-                            <field name="age" help="Isi dengan maksimal umur yang diinginkan" required="True" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
-							<field name="gender" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>                    
-							<field name="education" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>                    
-                            <field name="experience" required="True" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>    
-                            <field name="marital_status" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
+                            <label for="age"/>
+                                    <div class="o_row" name="age" style="width: 5rem">
+                                        <field name="age" help="Isi dengan maksimal umur yang diinginkan" required="True" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]" class="o_hr_narrow_field"/><span invisible="age == 0">(Maksimal)</span><span invisible="age != 0">(Tidak Ada Maksimal Umur)</span>
+                                    </div>
+							<field name="gender" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]" style="width: 5rem"/>
+							<label for="education"/>
+                                    <div class="o_row" name="education" style="width: 5rem">
+                                        <field name="education" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]" class="o_hr_narrow_field"/><span>(Minimal)</span>
+                                    </div> 
+                            <label for="experience"/>
+                                    <div class="o_row" name="experience" style="width: 5rem">
+                                        <field name="experience" required="True" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]" class="o_hr_narrow_field"/><span>(Minimal)</span>
+                                    </div>  
+                            <field name="marital_status" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]" style="width: 5rem"/>
                             <field name="spec_memo" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]"/>
                             <field name="skill" readonly="current_employee not in [next_approver] and not is_mpr_team and status_id not in [1]">
                                 <tree editable="bottom">
@@ -197,7 +207,7 @@
                                     <field name="name" class="align-middle"/>
 									<field name="status_id" class="align-middle"/>
 									<field name="available_date" class="align-middle"/>
-									<field name="expected_salary" class="align-middle"/>
+									<field name="expected_salary" widget="monetary" class="align-middle"/>
 									<field name="skill" widget="many2many_tags" class="align-middle"/>
 									<field name="currency_id" column_invisible="True"/>
                                 </tree>
@@ -349,6 +359,20 @@
     </record>
 	
 	
+		<!-- Job Vacancies -->
+	
+	<record id="job_vacancies_search" model="ir.ui.view">
+        <field name="name">job.vacancies.search</field>
+        <field name="model">job.vacancies</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+				<field name="name" string="Job Vacancies"
+                        filter_domain="['|', '|', ('name.name', 'ilike', self), ('job_position', 'ilike', self), ('manpower_request_id.name', 'ilike', self)]"/>
+				<filter string="Posting Date" name="posting_date" date="posting_date"/>
+            </search>
+        </field>
+    </record>	
+	
 		<!-- Candidate Screening -->
 	
 	<record id="candidate_screening_search" model="ir.ui.view">
@@ -363,6 +387,8 @@
 				<filter string="Active" name="active" domain="[('is_rejected', '=', 1)]"/>
 				<filter string="Rejected" name="rejected" domain="[('is_rejected', '=', 2)]"/>
 				<separator/>
+				<filter string="Hired" name="hired" domain="[('status_id', 'in', [11,12])]"/>
+				<separator/>
                     <filter string="My Request" name="my_request" domain="[('manpower_request_id.create_uid', '=', uid)]"/>
                     <filter string="Need My Review" name="my_review" domain="[('manpower_request_id.create_uid', '=', uid), ('status_id', '=', 5)]"/>
             </search>
@@ -373,19 +399,20 @@
         <field name="name">candidate.screening.tree</field>
         <field name="model">candidate.screening</field>
         <field name="arch" type="xml">
-            <tree string="Candidate Screening" delete="0">
+            <tree string="Candidate Screening" delete="0" duplicate="0">
                 <field name="name"/>
                 <field name="manpower_request_id"/>
                 <field name="age" optional="show"/>
                 <field name="marital_status" optional="show"/>
                 <field name="education" optional="show"/>
+                <field name="experience" optional="show"/>
                 <field name="available_date" optional="hide"/>
-                <field name="expected_salary" optional="show"/>
+                <field name="expected_salary" widget="monetary" optional="show"/>
                 <field name="skill" widget="many2many_tags" optional="show"/>
                 <field name="currency_id" column_invisible="True"/>
             </tree>
         </field>
-    </record>
+    </record>	
 	
 	<record id="candidate_screening_kanban" model="ir.ui.view">
         <field name="name">candidate.screening.kanban</field>
@@ -396,6 +423,7 @@
                 <field name="color"/>
                 <field name="currency_id"/>
                 <field name="is_rejected"/>
+                <field name="expected_salary"/>
                 <templates>                    
                     <t t-name="kanban-box">
                         <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
@@ -412,7 +440,7 @@
                                     <span name="education"><br/>Education : <field name="education"/></span>
                                     <span name="experience"><br/>Experience : <field name="experience"/></span>
                                     <span name="break" invisible="not expected_salary and not available_date"><br/></span>
-                                    <span name="expected_salary" invisible="not expected_salary"><br/>Expected Salary : <field name="expected_salary"/></span>
+                                    <span name="expected_salary" invisible="not expected_salary" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team"><br/>Expected Salary : <field name="expected_salary" widget="monetary"/></span>
                                     <span name="available_date" invisible="not available_date"><br/>Available Date : <field name="available_date"/></span>
                                 </div>
                             </div>
@@ -428,7 +456,7 @@
         <field name="name">candidate.screening.form</field>
         <field name="model">candidate.screening</field>
         <field name="arch" type="xml">
-            <form string="Candidate Screening" delete="0">
+            <form string="Candidate Screening" delete="0" duplicate="0">
                 <sheet>
 				<header>
 					<field name="status_id" widget="statusbar_duration"/>
@@ -458,6 +486,7 @@
                             <field name="create_date" invisible="not create_date"/>
                             <field name="manpower_request_id" string="MPR ID" readonly="True"/>
                             <field name="candidate_source_id" options="{'no_create': True, 'no_open': True}" readonly="not is_mpr_team"/>
+							<field name="email" readonly="not is_mpr_team"/>
 							<field name="dob" readonly="not is_mpr_team"/>
 							<label for="age" string="Age"/>
 							<div class="o_row o_hr_narrow_field">
@@ -469,7 +498,7 @@
                             <field name="marital_status" readonly="not is_mpr_team"/>
 							<label for="expected_salary" string="Expected Salary &amp; Benefit" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team"/>
                                 <div class="o_row" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team">
-                                    <field name="expected_salary" readonly="uid not in interviewers and not is_mpr_team"/>
+                                    <field name="expected_salary" widget="monetary" readonly="uid not in interviewers and not is_mpr_team"/>
                                     <field name="benefit" placeholder="Benefit lain bila ada" readonly="uid not in interviewers and not is_mpr_team"/>
                                 </div>
 							<field name="available_date" readonly="uid not in interviewers and not is_mpr_team"/>
@@ -754,7 +783,7 @@
         <field name="name">candidate.database.tree</field>
         <field name="model">candidate.database</field>
         <field name="arch" type="xml">
-            <tree string="Candidate Database" delete="0">
+            <tree string="Candidate Database" delete="0" duplicate="0">
                 <field name="name"/>
                 <field name="candidate_source_id"/>
                 <field name="gender"/>
@@ -770,7 +799,7 @@
         <field name="name">candidate.database.form</field>
         <field name="model">candidate.database</field>
         <field name="arch" type="xml">
-            <form string="Candidate Database" delete="0">
+            <form string="Candidate Database" delete="0" duplicate="0">
                 <sheet>
 				<header>
 				    <button string="Save" name="save" type="object"/>
@@ -789,6 +818,7 @@
                             <field name="create_date" invisible="not create_date"/>
 							<field name="manpower_request_id" invisible="not manpower_request_id" options="{'no_create': True}" />                            
 							<field name="candidate_source_id" options="{'no_create': True, 'no_open': True}" />                            
+							<field name="email"/>
 							<field name="dob"/>
 							<label for="age" string="Age"/>
 							<div class="o_row o_hr_narrow_field">
@@ -816,7 +846,7 @@
                                     <field name="manpower_request_id"/>
                                     <field name="job_position" string="Applied For"/>
                                     <field name="status_id" string="Last Status"/>
-                                    <field name="expected_salary" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team"/>
+                                    <field name="expected_salary" widget="monetary" groups="request.group_manager_bod, request.group_mpr_admin, request.group_mpr_team"/>
                                 </tree>
                             </field>
                             </page>
@@ -913,7 +943,7 @@
         <field name="name">mpr.reason.tree</field>
         <field name="model">mpr.reason</field>
         <field name="arch" type="xml">
-            <tree string="Request Reason" editable="bottom">
+            <tree string="Request Reason" editable="bottom" duplicate="0">
                 <field name="name"/>
                 <field name="sequence" widget="handle"/>
             </tree>
@@ -938,7 +968,7 @@
         <field name="name">candidate.reject.reason.tree</field>
         <field name="model">candidate.reject.reason</field>
         <field name="arch" type="xml">
-            <tree string="Candidate Reject Reason" editable="bottom">
+            <tree string="Candidate Reject Reason" editable="bottom" duplicate="0">
                 <field name="name"/>
                 <field name="sequence" widget="handle"/>
             </tree>
@@ -963,7 +993,7 @@
         <field name="name">working.location.tree</field>
         <field name="model">working.location</field>
         <field name="arch" type="xml">
-            <tree string="Working Location" editable="bottom">
+            <tree string="Working Location" editable="bottom" duplicate="0">
                 <field name="name"/>
                 <field name="sequence" widget="handle"/>
             </tree>
@@ -989,7 +1019,7 @@
         <field name="name">onboarding.item.tree</field>
         <field name="model">onboarding.item</field>
         <field name="arch" type="xml">
-            <tree string="Onboarding Item" editable="bottom">
+            <tree string="Onboarding Item" editable="bottom" duplicate="0">
                 <field name="name"/>
                 <field name="pic" options="{'no_create': True, 'no_open': True}" widget="many2many_tags"/>
                 <field name="sequence" widget="handle"/>
@@ -1024,6 +1054,7 @@
 				<separator/>
                     <filter string="My Request" name="my_request" domain="[('manpower_request_id.create_uid', '=', uid)]"/>
 					<filter string="My Interview" name="my_interview" domain="[('interviewers.user_id', '=', uid)]"/>
+					<filter string="Need My Confirmation" name="need_my_confirmation" domain="[('pending_confirm.user_id', '=', uid)]"/>
             </search>
         </field>
     </record>
@@ -1049,7 +1080,7 @@
         <field name="model">candidate.interview</field>
         <field name="priority" eval="2"/>
         <field name="arch" type="xml">
-            <form string="Meetings" delete="0">
+            <form string="Meetings" delete="0" duplicate="0">
                 <sheet>
 					<header>
 						<field name="status_id" widget="statusbar_duration"/>
@@ -1143,8 +1174,8 @@
                                 </div>
                                 <br/>
                                 <div class="o_kanban_record_body">
-									<span name="manpower_request_id">MPR ID : <field name="manpower_request_id"/></span>
-                                    <span name="candidate_status_id"><br/>Stage : <field name="candidate_status_id"/></span>
+                                    <b><span name="candidate_status_id">Stage : <field name="candidate_status_id"/></span></b>
+									<span name="manpower_request_id"><br/>MPR ID : <field name="manpower_request_id"/></span>
                                     <span name="job_position"><br/>Position : <field name="job_position"/></span>
                                     <span name="interview_mode"><br/>Interview Mode : <field name="interview_mode"/></span>
 									<span name="schedule"><br/>Schedule : <field name="start" widget="daterange" options="{'end_date_field': 'stop'}"/></span>
@@ -1165,6 +1196,18 @@
         <field name="res_model">candidate.interview</field>
         <field name="view_mode">calendar,kanban,form</field>
         <field name="view_id" ref="candidate_interview_calendar"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No interview found. Let's schedule one!
+          </p>
+        </field>
+    </record>
+	
+	<record id="action_candidate_interview_kanban" model="ir.actions.act_window">
+        <field name="name">Interview Schedule</field>
+        <field name="res_model">candidate.interview</field>
+        <field name="view_mode">calendar,kanban,form</field>
+        <field name="view_id" ref="candidate_interview_kanban"/>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
             No interview found. Let's schedule one!
@@ -1236,7 +1279,7 @@
         <field name="model">candidate.onboarding</field>
         <field name="priority" eval="2"/>
         <field name="arch" type="xml">
-            <form string="Candidate Onboarding" delete="0">
+            <form string="Candidate Onboarding" delete="0" duplicate="0">
                 <sheet>
 					<header>
 						<field name="status_id" widget="statusbar_duration" options="{'clickable': True}" invisible="current_employee not in pic"/>
@@ -1310,6 +1353,153 @@
     </record>
 	
 	
+			<!-- Reporting -->
+			
+	<record id="candidate_reject_report_view_graph" model="ir.ui.view">
+        <field name="name">candidate.reject.report.graph</field>
+        <field name="model">candidate.screening</field>
+		<field name="priority">100</field>
+        <field name="arch" type="xml">
+            <graph string="Candidate Rejection Analysis" sample="1">
+				<field name="reject_reason"/>
+                <field name="reject_by"/>
+                <field name="is_rejected" invisible="True"/>
+                <field name="color" invisible="True"/>
+                <field name="age" invisible="True"/>
+                <field name="ol_duration" invisible="True"/>
+                <field name="expected_salary" string="Average Expected Salary"/>
+            </graph>
+        </field>
+    </record>
+	
+	<record id="candidate_reject_report_view_pivot" model="ir.ui.view">
+        <field name="name">candidate.reject.report.pivot</field>
+        <field name="model">candidate.screening</field>
+		<field name="priority">150</field>
+        <field name="arch" type="xml">
+            <pivot string="Candidate Rejection Analysis" sample="1">
+				<field name="reject_reason" type="row"/>
+                <field name="status_id" type="col"/>
+                <field name="is_rejected" invisible="True"/>
+                <field name="color" invisible="True"/>
+                <field name="age" invisible="True"/>
+                <field name="ol_duration" invisible="True"/>
+                <field name="expected_salary" string="Average Expected Salary"/>
+            </pivot>
+        </field>
+    </record>
+	
+	<record id="candidate_average_expected_salary_report_view_pivot" model="ir.ui.view">
+        <field name="name">candidate.expected.salary.report.pivot</field>
+		<field name="priority">200</field>
+        <field name="model">candidate.screening</field>
+        <field name="arch" type="xml">
+            <pivot string="Candidate Reject Report" sample="1">
+				<field name="job_position" type="row"/>
+				<field name="experience" type="col" string="Experience"/>
+                <field name="expected_salary" type="measure" string="Average Expected Salary"/>
+                <field name="is_rejected" invisible="True"/>
+                <field name="color" invisible="True"/>
+                <field name="age" invisible="True"/>
+                <field name="ol_duration" invisible="True"/>
+            </pivot>
+        </field>
+    </record>
+	
+	<record id="job_vacancies_total_applicants_report_view_pivot" model="ir.ui.view">
+        <field name="name">job.vacancies.total.applicants.report.pivot</field>
+        <field name="model">job.vacancies</field>
+        <field name="arch" type="xml">
+            <pivot string="Total Applicants Analysis" sample="1">
+				<field name="name" type="col"/>
+				<field name="job_position" type="row"/>
+				<field name="applicants" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+	
+	<record id="candidate_reject_report_action" model="ir.actions.act_window">
+        <field name="name">Candidate Reject Report</field>
+        <field name="res_model">candidate.screening</field>
+        <field name="view_mode">graph,pivot</field>
+        <field name="view_id" ref="candidate_reject_report_view_graph"/>
+		<field name="domain">[('is_rejected', '=', 2)]</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No Candidate Found.
+          </p>
+        </field>
+    </record>
+	
+		<record id="action_view_candidate_reject_report_graph" model="ir.actions.act_window.view">
+			<field name="sequence" eval="1"/>
+			<field name="view_mode">graph</field>
+			<field name="act_window_id" ref="candidate_reject_report_action"/>
+			<field name="view_id" ref="candidate_reject_report_view_graph"/>
+		</record>	
+		<record id="action_view_candidate_reject_report_pivot" model="ir.actions.act_window.view">
+			<field name="sequence" eval="2"/>
+			<field name="view_mode">pivot</field>
+			<field name="act_window_id" ref="candidate_reject_report_action"/>
+			<field name="view_id" ref="candidate_reject_report_view_pivot"/>
+		</record>
+	
+	<record id="candidate_expected_salary_report_action" model="ir.actions.act_window">
+        <field name="name">Candidate Expected Salary Report</field>
+        <field name="res_model">candidate.screening</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="candidate_average_expected_salary_report_view_pivot"/>
+		<field name="domain">[('expected_salary', '>', 0)]</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No Candidate Found.
+          </p>
+        </field>
+    </record>
+	
+		<record id="action_view_candidate_expected_salary_report_pivot" model="ir.actions.act_window.view">
+			<field name="sequence" eval="1"/>
+			<field name="view_mode">pivot</field>
+			<field name="act_window_id" ref="candidate_expected_salary_report_action"/>
+			<field name="view_id" ref="candidate_average_expected_salary_report_view_pivot"/>
+		</record>
+		
+
+	
+	<record id="total_applicants_report_pivot_action" model="ir.actions.act_window">
+        <field name="name">Total Applicants Report</field>
+        <field name="res_model">job.vacancies</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="job_vacancies_total_applicants_report_view_pivot"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No Candidate Found.
+          </p>
+        </field>
+    </record>
+	
+	  <record model="ir.ui.view" id="board_candidate_screening_view">
+            <field name="name">My Dashboard</field>
+            <field name="model">board.board</field>
+            <field name="arch" type="xml">
+                <form string="My Dashboard">
+                    <board style="2-1">
+                        <column>
+                        </column>
+                    </board>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="open_board_candidate_screening_action">
+            <field name="name">Candidate Report</field>
+            <field name="res_model">board.board</field>
+            <field name="view_mode">form</field>
+            <field name="context">{'disable_toolbar': True}</field>
+            <field name="usage">menu</field>
+            <field name="view_id" ref="board_candidate_screening_view"/>
+        </record> 
+			
 			<!-- Menu Inherit -->
 			
 	<menuitem
@@ -1362,12 +1552,43 @@
         sequence="1"/>
 		
 	<menuitem
+        id="menu_req_manpower_report"
+        name="Report"
+        groups="request.group_mpr_admin"
+        parent="request.menu_req_manpower"
+        sequence="3"/>	
+		
+		<menuitem
+			id="menu_reject_report"
+			name="Candidate Reject"
+			parent="request.menu_req_manpower_report"
+			action="candidate_reject_report_action"
+			sequence="1"/>		
+		<menuitem
+			id="menu_expected_salary_report_pivot"
+			name="Expected Salary"
+			parent="request.menu_req_manpower_report"
+			action="candidate_expected_salary_report_action"
+			sequence="2"/>		
+		<menuitem
+			id="menu_total_applicants_report_pivot"
+			name="Total Applicants"
+			parent="request.menu_req_manpower_report"
+			action="total_applicants_report_pivot_action"
+			sequence="3"/>
+		<!-- <menuitem -->
+			<!-- id="menu_candidate_screening_dashboard" -->
+			<!-- name="Dashboard" -->
+			<!-- parent="request.menu_req_manpower_report" -->
+			<!-- action="open_board_candidate_screening_action" -->
+			<!-- sequence="4"/> -->
+		
+	<menuitem
         id="menu_req_manpower_configuration"
         name="Configuration"
         groups="request.group_mpr_admin"
         parent="request.menu_req_manpower"
-        sequence="3"/>
-		
+        sequence="4"/>
 		
 	<menuitem
         id="menu_onboarding_item"

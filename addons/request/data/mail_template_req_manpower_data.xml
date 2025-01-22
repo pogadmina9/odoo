@@ -87,6 +87,92 @@
 		
 		
 		
+	<!-- Email template for reminder need Approval -->
+	
+	
+	
+        <record id="reminder_need_approval_mpr" model="mail.template">
+            <field name="name">Reminder Need Approval MPR</field>
+            <field name="model_id" ref="request.model_req_manpower"/>
+            <field name="subject">Reminder Need Approval: Manpower Request {{ (object.name) }} from {{ (object.create_uid.name) }}</field>
+            <field name="email_from">info@performaoptimagroup.com</field>
+            <field name="email_to">{{ object.next_approver.work_email}}</field>
+            <field name="email_cc">{{ (object.create_uid.email_formatted) }}; {{ (object.direct_upline.work_email if object.direct_upline != object.requester and object.direct_upline not in object.pending_approver else '') }}</field>
+            <field name="description">Sent approval notification for new MPR</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">                    
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">MPR ID</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.create_uid.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.create_uid.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.create_uid.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-if="not object.next_approver"> Leaders</t><t t-if="object.next_approver"><t t-out="object.next_approver.name or ''">Approver</t></t>,<br /><br />
+                        Terdapat permintaan manpower baru untuk tim Anda dari <t t-out="object.requester.name or ''">Requester</t> dengan informasi sebagai berikut :<br />
+						 <br />
+						Position : <t t-out="object.job_position or ''">Posisi</t><br />
+						Direct Upline : <t t-out="object.direct_upline.name or ''">DirectUpline</t><br />
+						Department : <t t-out="object.candidate_department.display_name or ''">Department</t><br />
+						Quantity : <t t-out="object.quantity or ''">Quantity</t><br />
+						Deadline : <t t-out="object.deadline or ''">Deadline</t><br />
+						 <br />						 
+						Segera review dan approve / reject untuk melanjutkan.  <br />	
+						Silahkan akses link berikut : <br />
+						<br />
+						<div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.url_public"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Click Here
+                            </a>
+                        </div>
+						<br />
+                        Thank You and Best Regards<br />                        
+                        Performa Portal<br />                        
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://performaoptimagroup.com" style="color: #875A7B;">RR</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table></field>
+            <field name="lang">{{ object.write_uid.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+		
+		
+		
 		<!-- Email template for new MPR  -->
 		
 		
@@ -1369,7 +1455,7 @@
 						Silahkan akses link berikut : <br />
 						<br />
 						<div style="margin: 16px 0px 16px 0px;">
-                            <a t-att-href="object.url_public"
+                            <a t-att-href="object.screening_id.url_public"
                                 style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
                                 Click Here
                             </a>
