@@ -25,6 +25,12 @@ from odoo.tools.misc import get_lang
 from odoo.addons.resource.models.utils import Intervals
 from odoo.addons.resource.models.utils import filter_domain_leaf
 
+try:
+    import vobject
+except ImportError:
+    _logger.warning("`vobject` Python module not found, iCal file generation disabled. Consider installing this module if you want to generate iCal files")
+    vobject = None
+
 class MaintenanceTeam(models.Model):
     _inherit = 'maintenance.team'
 
@@ -231,7 +237,7 @@ class ReqManpower(models.Model):
     gender = fields.Selection([('Male', 'Male'), ('Female', 'Female')])
     experience = fields.Selection([('Fresh Graduate', 'Fresh Graduate'), ('1 Year', '1 Year'), ('2 Years', '2 Years'), ('3 Years', '3 Years'), ('4 Years', '4 Years'), ('5 Years', '5 Years'), ('5+ Years', '5+ Years')], required=True, tracking=True)
     marital_status = fields.Selection([('Single', 'Single'), ('Married', 'Married')])
-    skill = fields.One2many('candidate.skill', 'manpower_request_id', string='Skill')
+    skill = fields.One2many('candidate.skill', 'manpower_request_id', string='Skill', copy=True)
     spec_memo = fields.Text('Other Spec.', tracking=True)
     
     ##Analytics
@@ -260,6 +266,7 @@ class ReqManpower(models.Model):
     no_salary = fields.Boolean('No Salary')
     seq = fields.Integer('Sequence')
     current_employee = fields.Many2one('hr.employee', compute='_compute_current_employee')
+    from_duplicate = fields.Boolean('From Duplicate')
     is_approver = fields.Boolean('Approver', compute='_compute_is_aprover')
     is_mpr_team = fields.Boolean('MPR Team', compute='_compute_mpr_team')
     is_cancelled = fields.Boolean('Cancelled')
@@ -353,10 +360,11 @@ class ReqManpower(models.Model):
     
     def submit(self):
         self.compute_next_approver()
-        if self.is_cancelled:
+        self._compute_eligible_user()
+        if self.is_cancelled or self.from_duplicate:
             self._compute_approver()            
         self.write({'url_public': f"{'https://portal.performaoptimagroup.com/web#id='}{self.id}{'&cids=1&menu_id=488&action=1114&active_id=10&model=req.manpower&view_type=form'}"})
-        self.write({'is_rejected': 0, 'is_cancelled': 0, 'cancel_reason': False, 'submit_date': datetime.now()})
+        self.write({'is_rejected': 0, 'is_cancelled': 0, 'cancel_reason': False, 'submit_date': datetime.now(), 'from_duplicate': 0})
         if not self.pending_approver:
             self.write({'status_id': 3, 'approve_date': fields.Datetime.now()})
             self.create_new_mpr_email()
@@ -440,6 +448,16 @@ class ReqManpower(models.Model):
         mail_template.attachment_ids = [(6, 0, attachment)]
         mail_template.send_mail(self.id)
         
+    def create_reminder_approval_email(self):
+        mail_template = self.env.ref('request.reminder_need_approval_mpr')
+        for rec in self:
+            list_attachment = rec.attachment_ids
+            attachment = list_attachment.mapped("id")
+        for initial in self.attachment_ids:
+            initial.copy()
+        mail_template.attachment_ids = [(6, 0, attachment)]
+        mail_template.send_mail(self.id)
+        
     def create_new_mpr_email(self):
         mail_template = self.env.ref('request.new_mpr')
         for rec in self:
@@ -469,6 +487,8 @@ class ReqManpower(models.Model):
             self._update_current_mpr()
         if 'direct_upline' in vals:
             self._compute_eligible_user()
+        if 'job_position' in vals:
+            self.write_display_name()
      
     @api.depends("name")
     def write_display_name(self):
@@ -544,17 +564,20 @@ class ReqManpower(models.Model):
             list_bod = rec.sudo().env['hr.employee'].search([('job_id.name', 'ilike', 'Chief')])
             bod = list_bod.mapped("id")
             
-            if rec.requester.id in bod:
-                rec.pending_approver = False
-            
-            elif manager in bod:
-                rec.pending_approver = [(6, 0, [manager])]
-            
-            elif gm in bod:
-                rec.pending_approver = [(6, 0, [manager,gm])]
-            
+            if pending_approver:
+                if rec.requester.id in bod:
+                    rec.pending_approver = False
+                
+                elif manager in bod:
+                    rec.pending_approver = [(6, 0, [manager])]
+                
+                elif gm in bod:
+                    rec.pending_approver = [(6, 0, [manager,gm])]
+                
+                else:
+                    rec.pending_approver = [(6, 0, [manager,gm,director])]
             else:
-                rec.pending_approver = [(6, 0, [manager,gm,director])]
+                return
                 
                 
     def compute_next_approver(self):
@@ -608,6 +631,7 @@ class ReqManpower(models.Model):
                 manager = self.requester.manager_id.user_id.id
                 gm = self.requester.manager_id.manager_id.user_id.id
                 director = self.requester.manager_id.manager_id.parent_id.user_id.id
+                all_upline = manager + gm + director
                 if rec.direct_upline:
                     upline = rec.direct_upline.user_id.id
                     if manager in bod:
@@ -615,7 +639,7 @@ class ReqManpower(models.Model):
                     elif gm in bod:
                         rec.eligible_user = [(6, 0, [requester,manager,gm,upline])]
                     else:
-                        rec.eligible_user = [(6, 0, [requester,manager,gm,director,upline])]
+                        rec.eligible_user = [(6, 0, [requester,upline])]
                     
                 else:
                     if manager in bod:
@@ -623,7 +647,7 @@ class ReqManpower(models.Model):
                     elif gm in bod:
                         rec.eligible_user = [(6, 0, [requester,manager,gm])]
                     else:
-                        rec.eligible_user = [(6, 0, [requester,manager,gm,director])]
+                        rec.eligible_user = [(6, 0, [requester])]
             
             else:
                 rec.eligible_user = [(6, 0, [requester])]
@@ -643,7 +667,28 @@ class ReqManpower(models.Model):
         'res_id': self.id,
         'target': 'current'
         }
-
+        
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        uid = self.env.uid
+        current_employee = self.sudo().env['hr.employee'].search([('user_id', '=', uid)]).id
+        seq = self.env['ir.sequence'].next_by_code('mpr.seq')
+        if default is None:
+            default = {}
+        if not default.get('name'):
+            default['name'] = seq
+            default['status_id'] = 1
+            default['requester'] = current_employee
+            default['submit_date'] = False           
+            default['approve_date'] = False           
+            default['close_date'] = False           
+            default['from_duplicate'] = True           
+        return super(ReqManpower, self).copy(default)   
+    
+    def _cron_approval_reminder(self):
+        list_waiting_approval = self.sudo().env['req.manpower'].search([('status_id', '=', 2)])
+        for list in list_waiting_approval:
+            list.create_reminder_approval_email()
         
 class ManpowerApprovalList(models.Model):
     _name = 'manpower.approval.list'
@@ -694,6 +739,7 @@ class JobVacancies(models.Model):
     posting_date = fields.Date('Posting Date', default=lambda self: fields.Date.today())
     url = fields.Char('URL')
     applicants = fields.Integer('Applicants')
+    job_position = fields.Char(related='manpower_request_id.job_position', store=True)
     manpower_request_id = fields.Many2one('req.manpower', string='Req ID', ondelete='cascade')
     
 class CandidateOl(models.Model):
@@ -816,10 +862,11 @@ class CandidateScreening(models.Model):
     
     name = fields.Char('Name', tracking=True)
     manpower_request_id = fields.Many2one('req.manpower', string='Req ID', ondelete='cascade')
-    job_position = fields.Char(string='Position', related='manpower_request_id.job_position')
+    job_position = fields.Char(string='Position', related='manpower_request_id.job_position', store="True")
     candidate_database_id = fields.Many2one('candidate.database', string='Candidate Database', domain=[('screening_id', '=', False)])
     candidate_source_id = fields.Many2one('candidate.source', string='Source')
     status_id = fields.Many2one('candidate.status', string='Status', default=_default_stage, group_expand='_read_group_status_ids', tracking=True)
+    email = fields.Char(string='Email')
     education = fields.Selection([('SMA/SMK', 'SMA/SMK'), ('D3', 'D3'), ('Sarjana', 'Sarjana'), ('Magister', 'Magister'), ('Doktoral', 'Doktoral')], default='SMA/SMK', required=True, tracking=True)
     dob = fields.Date('Date of Birth')
     age = fields.Integer(store=True, compute='_compute_age', readonly=False)
@@ -827,7 +874,7 @@ class CandidateScreening(models.Model):
     experience = fields.Selection([('Fresh Graduate', 'Fresh Graduate'), ('1 Year', '1 Year'), ('2 Years', '2 Years'), ('3 Years', '3 Years'), ('4 Years', '4 Years'), ('5 Years', '5 Years'), ('5+ Years', '5+ Years')], required=True, tracking=True)
     marital_status = fields.Selection([('Single', 'Single'), ('Married', 'Married')])
     skill = fields.One2many('candidate.skill', 'screening_id', string='Skill')
-    expected_salary = fields.Monetary('Expected Salary')
+    expected_salary = fields.Float('Expected Salary', store=True, group_operator='avg')
     benefit = fields.Char('Benefit')
     available_date = fields.Date('Available Date', tracking=True)
     attachment_ids = fields.One2many('ir.attachment', 'res_id', string="Attachments", copy=True, help="Optional")
@@ -986,6 +1033,8 @@ class CandidateScreening(models.Model):
             self.candidate_database_id.name = self.name
         if 'dob' in vals:
             self.candidate_database_id.dob = self.dob
+        if 'email' in vals:
+            self.candidate_database_id.email = self.email    
         if 'age' in vals:
             self.candidate_database_id.age = self.age
         if 'gender' in vals:
@@ -1188,6 +1237,7 @@ class CandidateDatabase(models.Model):
 
     name = fields.Char('Name', required=True)
     candidate_source_id = fields.Many2one('candidate.source', string='Source')
+    email = fields.Char(string='Email', tracking=True)
     dob = fields.Date('Date of Birth')
     age = fields.Integer('Age')
     gender = fields.Selection([('Male', 'Male'), ('Female', 'Female')])
@@ -1195,7 +1245,7 @@ class CandidateDatabase(models.Model):
     manpower_request_id = fields.Many2one('req.manpower', string='Current Recruitment Process', related='screening_id.manpower_request_id')
     screening_id = fields.Many2one('candidate.screening', string="Current Screening")
     experience = fields.Selection([('Fresh Graduate', 'Fresh Graduate'), ('1 Year', '1 Year'), ('2 Years', '2 Years'), ('3 Years', '3 Years'), ('4 Years', '4 Years'), ('5 Years', '5 Years'), ('5+ Years', '5+ Years')], required=True, tracking=True)
-    marital_status = fields.Selection([('Single', 'Single'), ('Married', 'Married')])
+    marital_status = fields.Selection([('Single', 'Single'), ('Married', 'Married')], tracking=True)
     skill = fields.One2many('candidate.skill', 'candidate_database_id', string='Skill')
     attachment_ids = fields.One2many('ir.attachment', 'res_id', string="Attachments", copy=True, help="Optional")
     
@@ -1480,11 +1530,17 @@ class CandidateInterview(models.Model):
                 all_interviewers = search_all_interviewers.mapped("interviewers.user_id.id")
                 rec.sudo().manpower_request_id.interviewers = [(6, 0, all_interviewers)]
                 rec.sudo().screening_id.interviewers = [(6, 0, interviewers)]
-                
+                   
+    def _cron_interview_today_reminder(self):
+        list_today_reminder = self.sudo().env['candidate.interview'].search([("status_id", "=", [3]), ("start", ">=", fields.Datetime.to_string(fields.Datetime.today())), 
+                                                    ("stop", "<=", fields.Datetime.to_string(fields.Datetime.today().replace(hour=23, minute=59,second=59)))])
+        for list in list_today_reminder:
+            list.create_reminder_interview_email()
+    
     def _cron_interview_result_reminder(self):
         list_no_result = self.sudo().env['screening.result'].search([('note', '=', False)])
         interview_id = list_no_result.mapped("candidate_interview_id.id")
-        list_reminder = self.sudo().env['candidate.interview'].search([("stop", "<", fields.Datetime.to_string(fields.Datetime.today())), ('id', 'in', interview_id)])
+        list_reminder = self.sudo().env['candidate.interview'].search([("status_id", "in", [3,4]), ("stop", "<", fields.Datetime.to_string(fields.Datetime.today())), ('id', 'in', interview_id)])
         for list in list_reminder:
             list.create_reminder_interview_result_email()            
                 
@@ -1650,7 +1706,10 @@ class CandidateAction(models.Model):
     
     @api.depends('screening_id', 'interview_done')
     def _domain_interview_status(self):
-        if self.screening_status_id.id == 6 and self.interview_done == 'Yes':
+        if self.screening_status_id.id == 2:
+            self.dynamic_domain = [('id', 'in', [4,5,6,9])]
+            
+        elif self.screening_status_id.id == 6 and self.interview_done == 'Yes':
             self.dynamic_domain = [('id', 'in', [7,9])]
         
         elif self.screening_status_id.id == 7 and self.interview_done == 'Yes':

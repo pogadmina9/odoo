@@ -112,7 +112,7 @@
         <field name="name">req.task.tree</field>
         <field name="model">req.task</field>
         <field name="arch" type="xml">
-            <tree string="Task List">
+            <tree string="Task List" duplicate="0" delete="0">
                 <field name="name"/>
                 <field name="create_date"/>
                 <field name="status_id"/>
@@ -131,7 +131,7 @@
         <field name="name">req.task.form</field>
         <field name="model">req.task</field>
         <field name="arch" type="xml">
-            <form string="Task Details">
+            <form string="Task Details" duplicate="0" delete="0">
                 <sheet>
 				<header>
 				    <button string="Save" name="save" type="object"/>
@@ -144,7 +144,7 @@
 				    <button string="Delegate Action" name="open_delegation" type="object" invisible="not is_approver or not is_delegate_submit"/>
 				    <button string="Delegate Action" name="open_delegation" type="object" invisible="not is_pic_upline_delegation"/>
 				    <button string="Finish This Task" name="finish" type="object" invisible="status_id not in [4] or uid not in [pic] and not is_pic_upline"/>
-				    <button string="Finish This Task" name="finish" type="object" invisible="type not in ['personal']"/>
+				    <button string="Finish This Task" name="finish" type="object" invisible="type not in ['personal'] or status_id in [6,7]"/>
 					<button string="Finish This Task" name="finish" type="object" invisible="status_id not in [2,3] or uid not in [requester]"/>
 					<button string="Reopen This Task" name="open_reopen_form" type="object" invisible="type in ['personal'] or status_id not in [6] or uid not in [requester] and not is_requester_upline"/>
 				    <button string="Send Notification to Email" name="create_notification_task_mail" type="object" invisible="type in ['personal'] or status_id in [1,6]"/>
@@ -246,7 +246,7 @@
                     </page>
 					<page string="Approval List" invisible="type in ['personal']">
                             <field name="approval_list_ids" readonly="True">
-                            <tree>
+                            <tree no_open="1">
                                 <field name="name" readonly="True"/>
                                 <field name="action" readonly="True"/>
                                 <field name="approval_date" readonly="True"/>								
